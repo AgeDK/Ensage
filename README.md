@@ -1,5 +1,7 @@
 Ensage
 ======
 
-Libraries
-for Ensqage
+Hello!
+This is all in one repo.
+All latest Scripts and Libraries.
+Updates everyday!
