@@ -3,11 +3,11 @@
 require("libs.Utils")
 
 -- config
-xx = 254 -- x parameter of left-top corner of top bar heroes of your team.
+xx = 525 -- x parameter of left-top corner of top bar heroes of your team.
 yy = 5 -- y parameter of left-top corner of top bar heroes of your team.
-ww = 59 -- width of heroes icons.
-hh = 32 -- height of heroes icons.
-centwidth = 181 -- distance between icons of heroes of different teams.
+ww = 66 -- width of heroes icons.
+hh = 37 -- height of heroes icons.
+centwidth = 205 -- distance between icons of heroes of different teams.
 
 -- code
 sleeptick = 0
