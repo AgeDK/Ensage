@@ -16,7 +16,7 @@ string.byte("E"), --third ability hotkey.
 string.byte("R"), --fourth ability hotkey.
 string.byte("D"), --fifth ability hotkey.
 string.byte("F")} --sixth ability hotkey.
-xx = 525 -- x parameter of left-top corner of top bar heroes of your team.
+xx = 527 -- x parameter of left-top corner of top bar heroes of your team.
 yy = 5 -- y parameter of left-top corner of top bar heroes of your team.
 ww = 66 -- width of heroes icons.
 hh = 37 -- height of heroes icons.
