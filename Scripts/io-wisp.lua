@@ -3,7 +3,7 @@
 -- Config
 x = 50 -- x lable position
 y = 40 -- y lable position
-hotkey = string.byte("T") -- hotkey for combo relocate return
+hotkey = string.byte("Y") -- hotkey for combo relocate return
 
 -- Code
 font = drawMgr:CreateFont("iofont","Arial",14,500)
