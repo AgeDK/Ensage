@@ -3,7 +3,7 @@
 require("libs.Utils")
 
 -- config
-xx = 525 -- x parameter of left-top corner of top bar heroes of your team.
+xx = 527 -- x parameter of left-top corner of top bar heroes of your team.
 yy = 5 -- y parameter of left-top corner of top bar heroes of your team.
 ww = 66 -- width of heroes icons.
 hh = 37 -- height of heroes icons.
