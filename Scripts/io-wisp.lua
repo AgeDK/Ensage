@@ -1,8 +1,8 @@
 -- Made by Staskkk.
 
 -- Config
-x = 50 -- x lable position
-y = 40 -- y lable position
+x = 250 -- x lable position
+y = 25 -- y lable position
 hotkey = string.byte("Y") -- hotkey for combo relocate return
 
 -- Code
