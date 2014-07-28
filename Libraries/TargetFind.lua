@@ -2,15 +2,16 @@
 		Save as TargetFind.lua into Ensage\Scripts\libs.
 
 		Functions:
-			targetFind:GetLastMouseOver([source,]range): 	Returns the latest mouse-overed hero in the range of your given source (default = me). 
-																Without parameters is will just return the last mouse-overed hero.
-			targetFind:GetClosestToMouse([source,]range): 	Returns closest hero to the mouse position that is in range of your mouse position [and source.
-			targetFind:GetLowestEHP(range,type): 			Returns the hero by looking at their hp and resistances.
-																Type: Damage type. Possible inputs : "magic", "phys" and nothing
-																NoType: Compares purely by current HP
-																"phys": Comparation includes armor calculation and ignores ethereal heroes.
-																"magic": Comparation includes magic resistance calculation and ignores magic immune heroes.
-																Tresh: EHP Threshold. If entered function will only return a hero if it's EHP is lower than given amount
+			targetFind:GetLastMouseOver([source,]range): 					Returns the latest mouse-overed hero in the range of your given source (default = me). 
+																				Without parameters is will just return the last mouse-overed hero.
+			targetFind:GetClosestToMouse([source,]range[,includeFriendly):	Returns closest hero to the mouse position that is in range of your mouse position [and source.
+			targetFind:GetLowestEHP(range,type): 							Returns the hero by looking at their hp and resistances.
+																				Type: Damage type. Possible inputs : "magic", "phys" and nothing
+																				NoType: Compares purely by current HP
+																				"phys": Comparation includes armor calculation and ignores ethereal heroes.
+																				"magic": Comparation includes magic resistance calculation and ignores magic immune heroes.
+																				Tresh: EHP Threshold. If entered function will only return a hero if it's EHP is lower than given amount
+			targetFind:GetHighestPercentHP(range,Magic Immune, Illusion) : Returns closest hero, within the specified range, that has the highest % Hp, If Magic Immune and Illusions return False, It won't target them, else it will)
 		Examples:
 			targetFind:GetLastMouseOver(1000)
 			targetFind:GetClosestToMouse(500)
@@ -18,6 +19,8 @@
 			targetFind:GetLowestEHP(850,"magic")
 			targetFind:GetLowestEHP(99999,"magic",300)
 			targetFind:GetLowestEHP(1300)
+			targetFind:GetHighestPercentHP(500)
+			targetFind:GetHighestPercentHP(500,0,0)
 --]]
 
 require("libs.Utils")
@@ -36,6 +39,13 @@ function targetFind:TargetTick(tick)
 			self.i = self.i + 1
 		end
 	end
+end
+
+function targetFind:TargetClose()
+	-- reset all saved entities to prevent crashes!
+	self.lastMOver = nil
+	self.mOverTable = {}
+	self.i = 0
 end
 
 function targetFind:GetLastMouseOver(source,range)
@@ -66,17 +76,26 @@ function targetFind:GetMouseOverRank(ent)
 	end
 end
 
-function targetFind:GetClosestToMouse(source,range)
+function targetFind:GetClosestToMouse(source,range,includeFriendly)
 	local me = entityList:GetMyHero()
-	local enemyTeam = me:GetEnemyTeam()
+	
 	local mousePos = client.mousePosition
 	-- check if source is provided
-	if not range then 
+	if not includeFriendly and type(range) == "boolean" then
+		includeFriendly = range
+	end
+	if not range or type(range) == "boolean" then 
 		range = source
 		source = nil
 	end
 	-- check mouse [and source range
-	local enemies = entityList:FindEntities(function (v) return v.hero and v.alive and v.visible and not v:IsIllusion() and v.team == enemyTeam and (not source or v:GetDistance2D(source) < range) end)
+	local enemies 
+	if includeFriendly then
+		enemies = entityList:FindEntities(function (v) return v.hero and v.alive and v.visible and not v:IsIllusion() and (not source or v:GetDistance2D(source) < range) end)
+	else
+		local enemyTeam = me:GetEnemyTeam()
+		enemies = entityList:FindEntities(function (v) return v.hero and v.alive and v.visible and not v:IsIllusion() and v.team == enemyTeam and (not source or v:GetDistance2D(source) < range) end)
+	end
 	table.sort( enemies, function (a,b) return a:GetDistance2D(mousePos) < b:GetDistance2D(mousePos) end )
 	return enemies[1]
 end
@@ -105,7 +124,7 @@ function targetFind:GetLowestEHP(range,dmg_type,tresh)
 				immunity = false
 			end
 			local distance = GetDistance2D(me,v)
-			if distance <= range and v.alive and not v.illusion and v.visible and not immunity and (not tresh or (v.health*v_multipler) < tresh) then 
+			if distance <= range and v.alive and not v:IsIllusion() and v.visible and not immunity and (not tresh or (v.health*v_multipler) < tresh) then 
 				if not result or (result.health*l_multipler) > (v.health*v_multipler) then
 					result = v
 				end
@@ -115,4 +134,28 @@ function targetFind:GetLowestEHP(range,dmg_type,tresh)
 	return result
 end
 
+function targetFind:GetHighestPercentHP(range,magicImmune,illusion)
+	local me = entityList:GetMyHero()
+	local enemyTeam = me:GetEnemyTeam()
+	if magicImmune == nil then
+		magicImmune = false
+	elseif illusion == nil then
+		illusion = false
+	end
+	local result = nil
+	local enemies = entityList:FindEntities({type=LuaEntity.TYPE_HERO, team = enemyTeam})
+	for _,v in ipairs(enemies) do
+		if me:GetDistance2D(v) < range then			
+			local distance = GetDistance2D(me,v)
+			if distance <= range and v.alive and v.visible and (illusion or not v:IsIllusion()) and (magicImmune or not v:IsMagicImmune()) then 
+				if not result or result.health/result.maxHealth < v.health/v.maxHealth then
+					result = v
+				end
+			end
+		end
+	end
+	return result
+end
+
 scriptEngine:RegisterLibEvent(EVENT_TICK,targetFind.TargetTick,targetFind)
+scriptEngine:RegisterLibEvent(EVENT_CLOSE,targetFind.TargetClose,targetFind)
