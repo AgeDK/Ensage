@@ -1,11 +1,27 @@
 --[[		Config			]]
-hotkey = "F" --hotkey
-x,y = 5,70 -- gui position
-minimumCombo = {"item_blink", "item_sheepstick"} -- items you need to use the combo, may replace/add "item_dagon"
+
+-- NO CONFIG IN HERE
+-- LOAD THIS SCRIPT ONCE AND CHECK "Scripts\config\tinkerMadness.txt" for config options then
+
+--hotkey = "F" --hotkey
+--x,y = 5,70 -- gui position
+--minimumCombo = {"item_blink", "item_sheepstick"} -- items you need to use the combo, may replace/add "item_dagon"
 
 --[[		Code			]]
 require("libs.Utils")
 require("libs.TargetFind")
+require("libs.ScriptConfig")
+
+config = ScriptConfig.new()
+config:SetParameter("GUI x Position", 5)
+config:SetParameter("GUI y Position", 70)
+config:SetParameter("Hotkey", "F", config.TYPE_HOTKEY)
+config:SetParameter("MinimumCombo", "item_blink, item_sheepstick",config.TYPE_STRING_ARRAY)
+config:Load()
+
+minimumCombo = config.MinimumCombo
+x,y = config:GetParameter("GUI x Position"), config:GetParameter("GUI y Position")
+hotkey = config.Hotkey
 
 sleeptick = 0
 targetHandle = nil
@@ -24,9 +40,10 @@ function ComboTick( tick )
 		return
 	end
 
+	-- 8 times a second should be enough
 	sleeptick = tick + 125
 
-	-- check if hotkey was pressed twice
+	-- check if hotkey was pressed twice to deselect the target
 	if not targetHandle then
 		targetText.visible = false
 		statusText.text = "Combo ready."
@@ -89,14 +106,14 @@ function ComboTick( tick )
 		table.insert(castQueue,{1000+math.ceil(R:FindCastPoint()*1000),R})
 		return
 	end
-
+	-- calc the minimum cast range we need
 	if Q.level > 0 then minRange = Q.castRange end
 	if dagon then minRange = math.min(minRange,dagon.castRange) end
 	if ethereal then minRange = math.min(minRange,ethereal.castRange) end
 
 	local distance = me:GetDistance2D(target)
 	-- check if target is too far away
-	local blinkRange = blink:GetSpecialData("blink_range",1)
+	local blinkRange = blink:GetSpecialData("blink_range")
 	if blinkRange + minRange < distance then
 		statusText.text = string.format("Target is too far away (%i vs %i).",distance,blinkRange)
 		return
@@ -146,7 +163,7 @@ function Key( msg, code )
 		return
 	end
 	-- only our configured hotkey is interesting
-	if code == string.byte(hotkey) then
+	if code == hotkey then
 		-- get our target to destroy
 		local target = targetFind:GetClosestToMouse(500)
 		if not target or target:IsUnitState(LuaEntityNPC.STATE_MAGIC_IMMUNE) then
@@ -231,6 +248,7 @@ function Load()
 	end
 end
 
+-- if we're already ingame, the text may be visible
 if IsIngame() then
 	statusText.visible = true
 end
