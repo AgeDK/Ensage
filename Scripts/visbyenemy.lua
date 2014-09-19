@@ -1,13 +1,23 @@
 -- Made by Staskkk.
 
 require("libs.Utils")
+-- Config
+require("libs.ScriptConfig")
+
+config = ScriptConfig.new()
+config:SetParameter("Xcord", 227)
+config:SetParameter("Ycord", 4)
+config:SetParameter("Width", 66)
+config:SetParameter("Height", 38)
+config:SetParameter("Centwidth", 205)
+config:Load()
 
 -- config
-xx = 527 -- x parameter of left-top corner of top bar heroes of your team.
-yy = 5 -- y parameter of left-top corner of top bar heroes of your team.
-ww = 66 -- width of heroes icons.
-hh = 37 -- height of heroes icons.
-centwidth = 205 -- distance between icons of heroes of different teams.
+xx = config.Xcord -- x parameter of left-top corner of top bar heroes of your team.
+yy = config.Ycord -- y parameter of left-top corner of top bar heroes of your team.
+ww = config.Width -- width of heroes icons.
+hh = config.Height -- height of heroes icons.
+centwidth = config.Centwidth -- distance between icons of heroes of different teams.
 
 -- code
 sleeptick = 0
@@ -27,16 +37,16 @@ function Tick(tick)
 	end
 	sleeptick = tick + 200
 	if not init then
-		mp = entityList:GetMyPlayer()
+		me = entityList:GetMyHero()
 		init = true
 	end
 	if not couriers or #couriers == 0 then
-		couriers = entityList:GetEntities({type=LuaEntity.TYPE_COURIER, team = mp.team, alive=true})
+		couriers = entityList:GetEntities({type=LuaEntity.TYPE_COURIER, team = me.team, alive=true})
 		if #couriers ~= 0 then
 			pos = couriers[1].position
 		end
 	end
-	local heroes = entityList:GetEntities({type=LuaEntity.TYPE_HERO, team = mp.team, illusion = false})
+	local heroes = entityList:GetEntities({type=LuaEntity.TYPE_HERO, team = me.team, illusion = false})
 	for i,v in ipairs(heroes) do
 		if not panel[v.handle] then
 			if v.team == 3 then
