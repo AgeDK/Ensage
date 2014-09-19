@@ -5,19 +5,19 @@ require("libs.Utils")
 require("libs.ScriptConfig")
 
 config = ScriptConfig.new()
-config:SetParameter("Xcord", 527)
-config:SetParameter("Ycord", 4)
-config:SetParameter("Width", 66)
-config:SetParameter("Height", 38)
-config:SetParameter("Centwidth", 205)
+config:SetParameter("Xcord", 254)
+config:SetParameter("Ycord", 5)
+config:SetParameter("Width", 59)
+config:SetParameter("Height", 32)
+config:SetParameter("Centwidth", 181)
 config:Load()
 
 -- config
-527 = config.Xcord -- x parameter of left-top corner of top bar heroes of your team.
-4 = config.Ycord -- y parameter of left-top corner of top bar heroes of your team.
-66 = config.Width -- width of heroes icons.
-38 = config.Height -- height of heroes icons.
-205 = config.Centwidth -- distance between icons of heroes of different teams.
+xx = config.Xcord -- x parameter of left-top corner of top bar heroes of your team.
+yy = config.Ycord -- y parameter of left-top corner of top bar heroes of your team.
+ww = config.Width -- width of heroes icons.
+hh = config.Height -- height of heroes icons.
+centwidth = config.Centwidth -- distance between icons of heroes of different teams.
 
 -- code
 sleeptick = 0
