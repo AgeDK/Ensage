@@ -13,11 +13,11 @@ config:SetParameter("Centwidth", 205)
 config:Load()
 
 -- config
-xx = config.Xcord -- x parameter of left-top corner of top bar heroes of your team.
-yy = config.Ycord -- y parameter of left-top corner of top bar heroes of your team.
-ww = config.Width -- width of heroes icons.
-hh = config.Height -- height of heroes icons.
-centwidth = config.Centwidth -- distance between icons of heroes of different teams.
+527 = config.Xcord -- x parameter of left-top corner of top bar heroes of your team.
+4 = config.Ycord -- y parameter of left-top corner of top bar heroes of your team.
+66 = config.Width -- width of heroes icons.
+38 = config.Height -- height of heroes icons.
+205 = config.Centwidth -- distance between icons of heroes of different teams.
 
 -- code
 sleeptick = 0
