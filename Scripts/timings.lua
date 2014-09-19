@@ -1,13 +1,23 @@
 -- Made by Staskkk.
 
 require("libs.Utils")
+-- Config
+require("libs.ScriptConfig")
+
+config = ScriptConfig.new()
+config:SetParameter("Fontsize", 20)
+config:SetParameter("Imagesize", 20)
+config:SetParameter("Distancefontimage", 15)
+config:SetParameter("Verticaldistance", 14)
+config:SetParameter("Antiheight", 150)
+config:Load()
 
 -- config
-fontsize = 20
-imagesize = 20
-distance = 15 -- Distance between font and image. All parameters in pixels.
-verticaldistance = 14 -- Distance between two different modifiers.
-height = -150 -- Height of modifiers (may be positive and negative).
+fontsize = config.Fontsize
+imagesize = config.Imagesize
+distance = config.Distancefontimage -- Distance between font and image. All parameters in pixels.
+verticaldistance = config.Verticaldistance -- Distance between two different modifiers.
+height = -1*config.Antiheight -- Height of modifiers (may be positive and negative).
 
 -- Code
 modifnames = {
@@ -31,12 +41,12 @@ modifnames = {
 "modifier_windrunner_windrun",
 "modifier_brewmaster_primal_split",
 "modifier_puck_phase_shift",
-"modifier_sniper_assassinate",
 "modifier_heavens_halberd_debuff",
 "modifier_tinker_laser_blind",
 "modifier_invoker_deafening_blast_disarm",
 "modifier_keeper_of_the_light_blinding_light",
-"modifier_life_stealer_rage"
+"modifier_life_stealer_rage",
+"modifier_bloodseeker_rupture"
 },
 {
 "modifier_drowranger_wave_of_silence_knockback",
@@ -49,9 +59,7 @@ modifnames = {
 "modifier_earth_spirit_boulder_smash",
 "modifier_earthshaker_fissure_stun",
 "modifier_elder_titan_echo_stomp",
---"modifier_enigma_black_hole_pull",
 "modifier_faceless_void_timelock_freeze",
---"modifier_faceless_void_chronosphere_freeze",
 "modifier_invoker_cold_snap_freeze",
 "modifier_invoker_deafening_blast_knockback",
 "modifier_invoker_tornado",
@@ -95,24 +103,33 @@ modifnames = {
 {
 "modifier_bloodseeker_bloodrage",
 "modifier_silence",
---"modifier_disruptor_static_storm",
 "modifier_doom_bringer_doom",
 "modifier_earth_spirit_boulder_smash_silence",
 "modifier_night_stalker_crippling_fear",
---"modifier_riki_smoke_screen",
 "modifier_silencer_global_silence",
 "modifier_skywrath_mage_ancient_seal",
 "modifier_orchid_malevolence_debuff"
 }
 }
 
-font = drawMgr:CreateFont("timersfont","Arial",fontsize,500)
-timers = {}
-registered = false
-sleeptick = 0
+function regi(v,z)
+	if not timers[v.handle] then
+		timers[v.handle] = {}
+	end
+	if not timers[v.handle][z] then
+		timers[v.handle][z] = {}
+		local offset = v.healthbarOffset+height
+		timers[v.handle][z].time = drawMgr:CreateText(0,0,-1,"",font)
+		timers[v.handle][z].texture = drawMgr:CreateRect(0,0,imagesize,imagesize,0x000000FF)
+		timers[v.handle][z].time.entity = v
+		timers[v.handle][z].texture.entity = v
+		timers[v.handle][z].time.entityPosition = Vector(0, (imagesize+verticaldistance)*z-1, offset)
+		timers[v.handle][z].texture.entityPosition = Vector(-1*(imagesize+distance), (imagesize+verticaldistance)*z-1, offset)
+	end
+end
 
 function Modifadd(v,modif)
-	if v.type == LuaEntity.TYPE_HERO and not v.illusion then
+	if (v.type == LuaEntity.TYPE_HERO and not v.illusion) or (v.type == LuaEntity.TYPE_NPC and v.modifiers and (v.modifiers[1].name == "modifier_enigma_black_hole_thinker" or v.modifiers[1].name == "modifier_disruptor_static_storm_thinker" or v.modifiers[1].name == "modifier_riki_smoke_screen_thinker" or v.modifiers[1].name == "modifier_faceless_void_chronosphere_selfbuff" or v.modifiers[1].name == "modifier_phoenix_sun")) then
 		z = 0
 		stun = false
 		while not stun and z ~= 3 do
@@ -120,25 +137,17 @@ function Modifadd(v,modif)
 			x = 0
 			while not stun and x ~= #modifnames[z] do
 				x = x+1
-				if modif.name == modifnames[z][x] and (not timers[v.handle] or not timers[v.handle][z] or not timers[v.handle][z].time.visible or (timers[v.handle][z].dieTime > client.totalGameTime and modif.remainingTime > timers[v.handle][z].modif.remainingTime)) then
-					if not timers[v.handle] then
-						timers[v.handle] = {}
-					end
-					if not timers[v.handle][z] then
-						timers[v.handle][z] = {}
-						local offset = v.healthbarOffset+height
-						timers[v.handle][z].time = drawMgr:CreateText(0,0,-1,"",font)
-						timers[v.handle][z].texture = drawMgr:CreateRect(0,0,imagesize,imagesize,0x000000FF)
-						timers[v.handle][z].time.entity = v
-						timers[v.handle][z].texture.entity = v
-						timers[v.handle][z].time.entityPosition = Vector(0, (imagesize+verticaldistance)*z-1, offset)
-						timers[v.handle][z].texture.entityPosition = Vector(-1*(imagesize+distance), (imagesize+verticaldistance)*z-1, offset)
-					end
+				if v.type == LuaEntity.TYPE_NPC or (modif.name == modifnames[z][x] and (not timers[v.handle] or not timers[v.handle][z] or not timers[v.handle][z].time.visible or (timers[v.handle][z].entity:FindModifier(timers[v.handle][z].name) and modif.remainingTime > timers[v.handle][z].modif.remainingTime))) then
+					regi(v,z)
 					timers[v.handle][z].entity = v
 					timers[v.handle][z].modif = modif
-					timers[v.handle][z].dieTime = modif.dieTime
+					timers[v.handle][z].name = modif.name
 					timers[v.handle][z].time.visible = true
-					timers[v.handle][z].texture.textureId = drawMgr:GetTextureId("NyanUI/modifiers/"..string.sub(modif.name,10))
+					if v.type ~= LuaEntity.TYPE_NPC then
+						timers[v.handle][z].texture.textureId = drawMgr:GetTextureId("NyanUI/modifiers/"..string.sub(modif.name,10))
+					else
+						timers[v.handle][z].texture.textureId = drawMgr:GetTextureId("NyanUI/modifiers/"..modif.texture)
+					end
 					timers[v.handle][z].texture.visible = true
 					stun = true
 				end
@@ -148,28 +157,100 @@ function Modifadd(v,modif)
 end
 
 function Tick(tick)
-	if not client.connected or client.loading or sleeptick > tick or client.console or not entityList:GetMyHero() then
+	if not client.connected or client.loading or client.console or not entityList:GetMyHero() then
 		return
 	end
-	sleeptick = tick+50
-	heroes = entityList:GetEntities({type=LuaEntity.TYPE_HERO, illusion = false})
-	for i,v in ipairs(heroes) do
-		for q = 1,3 do
-			if timers[v.handle] and timers[v.handle][q] and timers[v.handle][q].time.visible then
-				if timers[v.handle][q].entity.alive and timers[v.handle][q].entity.visible and timers[v.handle][q].dieTime > client.totalGameTime then
-					timers[v.handle][q].time.text = tostring(math.floor(timers[v.handle][q].modif.remainingTime*10)/10)
-				else
-					timers[v.handle][q].time.visible = false
-					timers[v.handle][q].texture.visible = false
-					timers[v.handle][q].visible = false
+	if sleeptick < tick then
+		sleeptick = tick+50
+		entities[1] = entityList:GetEntities({classId = CDOTA_BaseNPC})
+		entities[2] = entityList:GetEntities({type=LuaEntity.TYPE_HERO, illusion = false})
+		entities[3] = entityList:GetEntities({classId = CDOTA_BaseNPC_Additive})
+		for _,w in ipairs(entities) do
+			for i,v in ipairs(w) do
+				for q = 1,3 do
+					if timers[v.handle] and timers[v.handle][q] and timers[v.handle][q].time.visible then
+						if not timers[v.handle][q].name then
+							if not v.alive then
+								timers[v.handle][q].time.text = tostring(math.floor(v.respawnTime*10)/10)
+							else
+								timers[v.handle][q].time.visible = false
+								timers[v.handle][q].texture.visible = false
+								timers[v.handle][q].visible = false
+								timers[v.handle][q].name = "1"
+							end
+						elseif timers[v.handle][q].entity:FindModifier(timers[v.handle][q].name) then
+							if timers[v.handle][q].name ~= "modifier_enigma_black_hole_thinker" then
+								timers[v.handle][q].time.text = tostring(math.floor(timers[v.handle][q].modif.remainingTime*10)/10)
+								if timers[v.handle][q].modif.texture == "wisp_relocate" then
+									if math.floor(timers[v.handle][q].modif.remainingTime*10) == 1 then
+										wisp.pos = v.position
+									elseif timers[v.handle][q].modif.remainingTime == 0 then
+										count = 121
+										pretime,delay = math.modf(client.totalGameTime*10)
+										pretime = pretime+1
+									end
+								end
+							else
+								timers[v.handle][q].time.text = tostring(math.floor((4-timers[v.handle][q].modif.elapsedTime)*10)/10)
+							end
+						else
+							timers[v.handle][q].time.visible = false
+							timers[v.handle][q].texture.visible = false
+							timers[v.handle][q].visible = false
+						end
+					end
+				end
+				if v.reincarnating then
+					regi(v,3)
+					timers[v.handle][3].entity = v
+					timers[v.handle][3].modif = nil
+					timers[v.handle][3].name = nil
+					timers[v.handle][3].time.visible = true
+					timers[v.handle][3].texture.textureId = drawMgr:GetTextureId("NyanUI/modifiers/skeleton_king_reincarnate_slow")
+					timers[v.handle][3].texture.visible = true
 				end
 			end
+		end
+	end
+	if pretime then
+		local gametime = client.totalGameTime*10
+		if gametime >= pretime+delay then
+			pretime = pretime+1
+			count = count-1
+			wisp.time.text = tostring(count/10)
+		end
+		q,positi = client:ScreenPosition(wisp.pos)
+		if q then
+			wisp.time.position = Vector2D(positi.x+distance,positi.y)
+			wisp.texture.position = Vector2D(positi.x-distance,positi.y)
+			if not wisp.time.visible then
+				wisp.time.visible = true
+				wisp.texture.visible = true
+			end
+		elseif wisp.time.visible then
+			wisp.time.visible = false
+			wisp.texture.visible = false
+		end
+		if count == 0 then
+			wisp.time.visible = false
+			wisp.texture.visible = false
+			pretime = nil
 		end
 	end
 end
 
 function Load()
 	if registered then return end
+font = drawMgr:CreateFont("timersfont","Arial",fontsize,500)
+timers = {}
+entities = {}
+wisp = {}
+wisp.time = drawMgr:CreateText(0,0,-1,"",font)
+wisp.time.visible = false
+wisp.texture = drawMgr:CreateRect(0,0,imagesize,imagesize,0x000000FF,drawMgr:GetTextureId("NyanUI/modifiers/wisp_relocate_return"))
+wisp.texture.visible = false
+registered = false
+sleeptick = 0
 	script:RegisterEvent(EVENT_TICK,Tick)
 	script:RegisterEvent(EVENT_MODIFIER_ADD,Modifadd)
 	registered = true
