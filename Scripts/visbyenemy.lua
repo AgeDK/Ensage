@@ -5,7 +5,7 @@ require("libs.Utils")
 require("libs.ScriptConfig")
 
 config = ScriptConfig.new()
-config:SetParameter("Xcord", 227)
+config:SetParameter("Xcord", 527)
 config:SetParameter("Ycord", 4)
 config:SetParameter("Width", 66)
 config:SetParameter("Height", 38)
