@@ -1,18 +1,71 @@
+--<<Invoker helper. Combos and hotkeys for spells and orbs>>
 -- Made by Sophylax for old version. Reworked by Staskkk for New version.
 
 require("libs.Utils")
+require("libs.ScriptConfig")
+
+config = ScriptConfig.new()
+config:SetParameter("combo1", "Z")
+config:SetParameter("combo2", "X")
+config:SetParameter("combo3", "C")
+config:SetParameter("combo4", "T")
+config:SetParameter("combo5", "V")
+config:SetParameter("combo6", "B")
+config:SetParameter("combo7", "G")
+config:SetParameter("combo8", "H")
+config:SetParameter("a1qqq", "1")
+config:SetParameter("a2qqw", "2")
+config:SetParameter("a3qww", "3")
+config:SetParameter("a4www", "4")
+config:SetParameter("a5wwe", "5")
+config:SetParameter("a6wee", "6")
+config:SetParameter("a7eee", "7")
+config:SetParameter("a8qee", "8")
+config:SetParameter("a9qqe", "9")
+config:SetParameter("a0qwe", "0")
+config:SetParameter("KeyForCastingOrbs", "space")
+config:SetParameter("Xcord", 50)
+config:SetParameter("Ycord", 30)
+config:Load()
+
+function numpad( strkey )
+        if strkey == "n0" then return 96
+                elseif strkey == "n1" then return 97
+                elseif strkey == "n2" then return 98
+                elseif strkey == "n3" then return 99
+                elseif strkey == "n4" then return 100
+                elseif strkey == "n5" then return 101
+                elseif strkey == "n6" then return 102
+                elseif strkey == "n7" then return 103
+                elseif strkey == "n8" then return 104
+                elseif strkey == "n9" then return 105
+                elseif strkey == "n*" then return 106
+                elseif strkey == "n+" then return 107
+                elseif strkey == "n-" then return 109
+                elseif strkey == "n." then return 110
+                elseif strkey == "n/" then return 111
+                elseif strkey == "space" then return 32
+                elseif strkey == "alt" then return 18
+                elseif string.len(strkey) > 2 or strkey == "" then return 124
+                else return string.byte( strkey )
+        end
+end
 
 -- config
-x = 50
-y = 30
-combokey = {"Z","X","C","T","V","B"}
+x = config.Xcord
+y = config.Ycord
+KeyForCastingOrbs = numpad(config.KeyForCastingOrbs)
+combokey = {numpad(config.combo1),numpad(config.combo2),numpad(config.combo3),numpad(config.combo4),numpad(config.combo5),numpad(config.combo6),
+numpad(config.combo7),numpad(config.combo8)}
 -- 1 - TotalCombo: Tornado - EMP - Chaos Meteor - Deafening Blast - Cold Snap - Forge Spirit - Sun Strike - Ice Wall
 -- 2 - TornadoEMPCombo: Tornado - EMP
 -- 3 - TornadoMeteorWallCombo: Tornado - Chaos Meteor - Ice Wall
 -- 4 - MeteorBlastCombo: Chaos Meteor - Deafening Blast
 -- 5 - SnapDPSCombo: Cold Snap - Forge Spirit - Alacrity
 -- 6 - EulSSMeteorBlast Eul - Sun Strike - Chaos Meteor - Deafening Blast
-hotkey = {qqq="1", qqw="2", qww="3", www="4", wwe="5", wee="6", eee="7", qee="8", qqe="9", qwe="0"}
+-- 7 - Tornado - EMP - Chaos Meteor - Deafening Blast
+-- 8 - Tornado - Chaos Meteor - Deafening Blast
+hotkey = {numpad(config.a1qqq), numpad(config.a2qqw), numpad(config.a3qww), numpad(config.a4www), numpad(config.a5wwe), numpad(config.a6wee), numpad(config.a7eee), numpad(config.a8qee), numpad(config.a9qqe), numpad(config.a0qwe)}
 -- "Q" with space = 3 Quas, "W" with space = 3 Wex, "E" with space = 3 Exort
 -- Tab - shows you combos hotkeys
 range = 1000
@@ -36,33 +89,77 @@ prepWall = false
 prepTick = 0
 target = nil
 torndur = {0800,1100,1400,1700,2000,2300,2500}
-empdelay = {3700,3400,3150,2850,2600,2300,2000}
+empdelay = 2900
+meteordelay = 1300
+tornspeed = 1000
+--blastspeed = 1000
+sundelay = 1700
+
 queue = {}
 future = {}
 Keys = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false}
 activeCombo = false
 chatting = {false,false}
-combos = {"TotalCombo","TornadoEMP","TornadoMeteorWall","MeteorBlast","SnapDPS","EulSSMeteorBlast"}
+combos = {"TotalCombo","TornadoEMP","TornadoMeteorWall","MeteorBlast","SnapDPS","EulSSMeteorBlast","TornadoEMPBlast","TornadoMeteorBlast"}
  
 -------------------------- COMBO SETTINGS --------------------------
 
 -- Tornado - EMP - Chaos Meteor - Deafening Blast - Cold Snap - Forge Spirit - Sun Strike - Ice Wall
 function TotalCombo( )
-        if me:GetAbility(1).level ~= 0 and me:GetAbility(2).level ~= 0 then
-                queue = {qww,{"wait",torndur[me:GetAbility(1).level]-empdelay[me:GetAbility(2).level]+250},www,{"wait",100},wee,{"wait",1300},qwe,qqq,qee,eee}
+        if target then
+                local blasttime = math.floor((GetDistance2D(me,target)-34)/tornspeed*1000)
+                local torntime = blasttime+torndur[me:GetAbility(1).level]
+                if torntime > empdelay and torntime > meteordelay then
+                        torntime = torntime-300
+                        if torntime-empdelay < 0 then torntime = empdelay end
+                        queue = {qww,{"wait",torntime-empdelay},www,{"wait",empdelay-meteordelay-700},wee,{"wait",meteordelay-blasttime},qwe,qqq,qee,eee}
+                elseif torntime > meteordelay then
+                        torntime = torntime+300
+                        if empdelay-torntime < 0 then torntime = empdelay end
+                        meteordel = meteordelay+700
+                        if torntime-meteordel < 0 then meteordel = torntime end
+                        queue = {www,{"wait",empdelay-torntime},qww,{"wait",torntime-meteordel},wee,{"wait",meteordel-blasttime},qwe,qqq,qee,eee}
+                else
+                        torntime = torntime+300
+                        queue = {www,wee,qww,{"wait",torntime-blasttime},qwe,qqq,qee,eee}
+                end
+        else
+                queue = {qww,{"wait",torndur[me:GetAbility(1).level]-empdelay+250},www,{"wait",100},wee,{"wait",1300},qwe,qqq,qee,eee}
         end
 end
  
 -- Tornado - EMP
 function TornadoEMPCombo( )
-        if me:GetAbility(1).level ~= 0 and me:GetAbility(2).level ~= 0 then
-                queue = {qww,{"wait",torndur[me:GetAbility(1).level]-empdelay[me:GetAbility(2).level]+250},www}
+        if target then
+                local torntime = math.floor((GetDistance2D(me,target)-34)/tornspeed*1000)+torndur[me:GetAbility(1).level]
+                if torntime > empdelay then
+                        torntime = torntime-300
+                        if torntime-empdelay < 0 then torntime = empdelay end
+                        queue = {qww,{"wait",torntime-empdelay},www}
+                else
+                        torntime = torntime+300
+                        if empdelay-torntime < 0 then torntime = empdelay end
+                        queue = {www,{"wait",empdelay-torntime},qww}
+                end
+        else
+                queue = {qww,{"wait",torndur[me:GetAbility(1).level]-empdelay+250},www}
         end
 end
  
 -- Tornado - Chaos Meteor - Ice Wall
 function TornadoMeteorWallCombo( )
-        if me:GetAbility(1).level ~= 0 then
+        if target then
+                local torntime = math.floor((GetDistance2D(me,target)-34)/tornspeed*1000)+torndur[me:GetAbility(1).level]
+                if torntime > meteordelay then
+                        torntime = torntime-300
+                        if torntime-meteordelay < 0 then torntime = meteordelay end
+                        queue = {qww,{"wait",torntime-meteordelay},wee,qqe}
+                else
+                        torntime = torntime+300
+                        if meteordelay-torntime < 0 then torntime = meteordelay end
+                        queue = {wee,{"wait",meteordelay-torntime},qww,qqe}
+                end
+        else
                 queue = {qww,{"wait",torndur[me:GetAbility(1).level]-1300},wee,{"wait",1000},qqe}
         end
 end
@@ -82,12 +179,55 @@ function EulSSMeteorBlast( )
         queue = {{"item_unit","item_cyclone"},{"wait",800},eee,{"wait",400},wee,{"wait",1000},qwe}
 end
  
+-- Tornado - EMP - Chaos Meteor - Deafening Blast
+function TornadoEMPMeteorBlastCombo( )
+        if target then
+                local blasttime = math.floor((GetDistance2D(me,target)-34)/tornspeed*1000)
+                local torntime = blasttime+torndur[me:GetAbility(1).level]
+                if torntime > empdelay and torntime > meteordelay then
+                        torntime = torntime-300
+                        if torntime-empdelay < 0 then torntime = empdelay end
+                        queue = {qww,{"wait",torntime-empdelay},www,{"wait",empdelay-meteordelay-700},wee,{"wait",meteordelay-blasttime},qwe}
+                elseif torntime > meteordelay then
+                        torntime = torntime+300
+                        if empdelay-torntime < 0 then torntime = empdelay end
+                        meteordel = meteordelay+700
+                        if torntime-meteordel < 0 then meteordel = torntime end
+                        queue = {www,{"wait",empdelay-torntime},qww,{"wait",torntime-meteordel},wee,{"wait",meteordel-blasttime},qwe}
+                else
+                        torntime = torntime+300
+                        queue = {www,wee,qww,{"wait",torntime-blasttime},qwe,qqq,qee,eee}
+                end
+        else
+                queue = {qww,{"wait",torndur[me:GetAbility(1).level]-empdelay+250},www,{"wait",100},wee,{"wait",1300},qwe}
+        end
+end
+ 
+-- Tornado - Chaos Meteor - Deafening Blast
+function TornadoMeteorBlastCombo( )
+        if target then
+                local blasttime = math.floor((GetDistance2D(me,target)-34)/tornspeed*1000)
+                local torntime = blasttime+torndur[me:GetAbility(1).level]
+                if torntime > meteordelay then
+                        torntime = torntime-300
+                        if torntime-meteordelay < 0 then torntime = meteordelay end
+                        queue = {qww,{"wait",torntime-meteordelay},wee,{"wait",meteordelay-blasttime-400},qwe}
+                else
+                        torntime = torntime+300
+                        if meteordelay-torntime < 0 then torntime = meteordelay end
+                        queue = {wee,{"wait",meteordelay-torntime},qww,{"wait",torntime-blasttime-700},qwe}
+                end
+        else
+                queue = {qww,{"wait",torndur[me:GetAbility(1).level]-1600},wee,{"wait",1450},qwe}
+        end
+end
+ 
 function StopCombo( )
         queue = {}
 end
  
 -------------------------- COMBO SETTINGS --------------------------
- 
+
 function Tick( tick )
  
         if not client.connected or client.loading or client.console or not entityList:GetMyHero() then
@@ -173,6 +313,10 @@ function Tick( tick )
                                 PrepareCombo(SnapDPSCombo( ))
                         elseif Keys[21] then
                                 PrepareCombo(EulSSMeteorBlast( ))
+                        elseif Keys[22] then
+                                PrepareCombo(TornadoEMPMeteorBlastCombo( ))
+                        elseif Keys[23] then
+                                PrepareCombo(TornadoMeteorBlastCombo( ))
                         elseif Keys[16] and CanCast(me:GetAbility(1)) then
                                 mp:UseAbility(me:GetAbility(1))
                                 mp:UseAbility(me:GetAbility(1))
@@ -210,27 +354,35 @@ function Tick( tick )
                                 CastCombination(qqe)
                         elseif Keys[10] then
                                 CastCombination(qwe)
-                        elseif Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and not activeCombo then
+                        elseif Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and not Keys[22] and not Keys[23] and not activeCombo then
+                                 first = true
                                  TotalCombo( )
                                 activeCombo = true
-                        elseif not Keys[11] and Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and not activeCombo then
+                        elseif not Keys[11] and Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and not Keys[22] and not Keys[23] and not activeCombo then
                                  TornadoEMPCombo( )
                                 activeCombo = true
-                        elseif not Keys[11] and not Keys[12] and Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and not activeCombo then
+                        elseif not Keys[11] and not Keys[12] and Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and not Keys[22] and not Keys[23] and not activeCombo then
                                  TornadoMeteorWallCombo( )
                                 activeCombo = true
-                        elseif not Keys[11] and not Keys[12] and not Keys[13] and Keys[14] and not Keys[20] and not Keys[21] and not activeCombo then
+                        elseif not Keys[11] and not Keys[12] and not Keys[13] and Keys[14] and not Keys[20] and not Keys[21] and not Keys[22] and not Keys[23] and not activeCombo then
                                  MeteorBlastCombo( )
                                 activeCombo = true
-                        elseif not Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and Keys[20] and not Keys[21] and not activeCombo then
+                        elseif not Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and Keys[20] and not Keys[21] and not Keys[22] and not Keys[23] and not activeCombo then
                                  SnapDPSCombo( )
                                 activeCombo = true
-                        elseif not Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and Keys[21] and not activeCombo then
+                        elseif not Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and Keys[21] and not Keys[22] and not Keys[23] and not activeCombo then
                                  EulSSMeteorBlast( )
                                 activeCombo = true
-                        elseif (Keys[11] or  Keys[12] or  Keys[13] or  Keys[14] or  Keys[20] or  Keys[21])and activeCombo then
+                        elseif not Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and Keys[22] and not Keys[23] and not activeCombo then
+                                 TornadoEMPMeteorBlastCombo( )
+                                activeCombo = true
+                        elseif not Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and not Keys[22] and Keys[23] and not activeCombo then
+                                 TornadoMeteorBlastCombo( )
+                                activeCombo = true
+                        elseif (Keys[11] or  Keys[12] or  Keys[13] or  Keys[14] or  Keys[20] or  Keys[21] or Keys[22] or Keys[23])and activeCombo then
                                 Combo()
-                        elseif not Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] then
+                        elseif not Keys[11] and not Keys[12] and not Keys[13] and not Keys[14] and not Keys[20] and not Keys[21] and not Keys[22] and not Keys[23] then
+                                first = false
                                 StopCombo()
                                 activeCombo = false
                         end
@@ -340,6 +492,7 @@ function GetSpell(SpellName)
 end
  
 function PrepareCombo(func)
+        if func == nil then return end
         func()
         local tempqueue = {{"wait",10}}
         for k,v in pairs(queue) do tempqueue[k] = v end
@@ -353,11 +506,11 @@ function PrepareCombo(func)
                         i = i +1
                 end
                 k = k + 1
-    end
+        end
 end
  
 function InCombo()
-        return (Keys[11] or  Keys[12] or  Keys[13] or  Keys[14] or  Keys[20] or Keys[21])
+        return (Keys[11] or  Keys[12] or  Keys[13] or  Keys[14] or  Keys[20] or Keys[21] or Keys[22] or Keys[23])
 end
  
 function Combo()
@@ -390,13 +543,27 @@ function Combo()
                                 table.remove(queue,1)
                         end
                 elseif target then
-                        CastCombination(queue[1])
-                        if nextStep then
-                                table.remove(queue,1)
-                                nextStep = false
+                        if first then
+                                fir = entityList:GetEntities(function (a) return a.name == queue[1][4] end)
+                                if fir[1] and fir[1].cd ~= 0 then
+                                        table.remove(queue,1)
+                                else
+                                        CastCombination(queue[1])
+                                        if nextStep then
+                                                table.remove(queue,1)
+                                                nextStep = false
+                                        end
+                                end
+                        else
+                                CastCombination(queue[1])
+                                if nextStep then
+                                        table.remove(queue,1)
+                                        nextStep = false
+                                end
                         end
                 end
         end
+        if #queue == 0 then first = false end
         if #queue > 1 and InCombo then
                 if queue[2][1] ~= "wait" and queue[2][1] ~= "item_unit" and queue[2][1] ~= "item_point" and queue[2][1] ~= "item_self" and queue[2][1] ~= "item_notarget" then
                         Invoke(queue[2])
@@ -484,24 +651,25 @@ function Key( msg, code )
         chatting[2] = (not chatting[2])
         end
         if chatting[1] then return end
-       
-                if code == string.byte(hotkey.qqq) then Keys[1] = (msg == KEY_DOWN)
-        elseif code == string.byte(hotkey.qqw) then Keys[2] = (msg == KEY_DOWN)
-        elseif code == string.byte(hotkey.qww) then Keys[3] = (msg == KEY_DOWN)
-        elseif code == string.byte(hotkey.www) then Keys[4] = (msg == KEY_DOWN)
-        elseif code == string.byte(hotkey.wwe) then Keys[5] = (msg == KEY_DOWN)    
-        elseif code == string.byte(hotkey.wee) then Keys[6] = (msg == KEY_DOWN)
-        elseif code == string.byte(hotkey.eee) then Keys[7] = (msg == KEY_DOWN)
-        elseif code == string.byte(hotkey.qee) then Keys[8] = (msg == KEY_DOWN)
-        elseif code == string.byte(hotkey.qqe) then Keys[9] = (msg == KEY_DOWN)
-        elseif code == string.byte(hotkey.qwe) then Keys[10] = (msg == KEY_DOWN)    
-        elseif code == string.byte(combokey[1]) then Keys[11] = (msg == KEY_DOWN)
-        elseif code == string.byte(combokey[2]) then Keys[12] = (msg == KEY_DOWN)
-        elseif code == string.byte(combokey[3]) then Keys[13] = (msg == KEY_DOWN)
-        elseif code == string.byte(combokey[4]) then Keys[14] = (msg == KEY_DOWN)
-        elseif code == string.byte(combokey[5]) then Keys[20] = (msg == KEY_DOWN)
-        elseif code == string.byte(combokey[6]) then Keys[21] = (msg == KEY_DOWN)   
-        elseif code == string.byte(" ") then Keys[15] = (msg == KEY_DOWN)      
+                if code == hotkey[1] then Keys[1] = (msg == KEY_DOWN)
+        elseif code == hotkey[2] then Keys[2] = (msg == KEY_DOWN)
+        elseif code == hotkey[3] then Keys[3] = (msg == KEY_DOWN)
+        elseif code == hotkey[4] then Keys[4] = (msg == KEY_DOWN)
+        elseif code == hotkey[5] then Keys[5] = (msg == KEY_DOWN)    
+        elseif code == hotkey[6] then Keys[6] = (msg == KEY_DOWN)
+        elseif code == hotkey[7] then Keys[7] = (msg == KEY_DOWN)
+        elseif code == hotkey[8] then Keys[8] = (msg == KEY_DOWN)
+        elseif code == hotkey[9] then Keys[9] = (msg == KEY_DOWN)
+        elseif code == hotkey[10] then Keys[10] = (msg == KEY_DOWN)    
+        elseif code == combokey[1] then Keys[11] = (msg == KEY_DOWN)
+        elseif code == combokey[2] then Keys[12] = (msg == KEY_DOWN)
+        elseif code == combokey[3] then Keys[13] = (msg == KEY_DOWN)
+        elseif code == combokey[4] then Keys[14] = (msg == KEY_DOWN)
+        elseif code == combokey[5] then Keys[20] = (msg == KEY_DOWN)
+        elseif code == combokey[6] then Keys[21] = (msg == KEY_DOWN)
+        elseif code == combokey[7] then Keys[22] = (msg == KEY_DOWN)
+        elseif code == combokey[8] then Keys[23] = (msg == KEY_DOWN)
+        elseif code == KeyForCastingOrbs then Keys[15] = (msg == KEY_DOWN)      
         elseif code == string.byte("Q") then Keys[16] = (msg == KEY_DOWN)      
         elseif code == string.byte("W") then Keys[17] = (msg == KEY_DOWN)      
         elseif code == string.byte("E") then Keys[18] = (msg == KEY_DOWN)
@@ -520,6 +688,7 @@ function Load()
         script:RegisterEvent(EVENT_KEY,Key)
         script:RegisterEvent(EVENT_TICK,Tick)
         registered = true
+        first = false
 end
  
 function Close()
