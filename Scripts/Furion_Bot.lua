@@ -10,7 +10,7 @@ require("libs.ScriptConfig")
 --      CONFIG       --
 --===================--
 local config = ScriptConfig.new()
-config:SetParameter("Test", "L", config.TYPE_HOTKEY)
+config:SetParameter("Test", "B", config.TYPE_HOTKEY)
 config:SetParameter("minHealth", 150)
 config:SetParameter("Radius", 200)
 config:SetParameter("Midas", false)
