@@ -18,13 +18,13 @@ config:SetParameter("MaxNotFindTarget", 3)
 config:SetParameter("Ult", 1) -- 1 = CD; 2 = none
 config:Load()
 local levels = {2,3,2,5,2,4,2,5,3,5,4,5,5,5,5,4,5,5,3,3,1,1,1,1,5}
-local purchaseStartingItems = {27, 45, 16} -- Ring of regen, courier, branches
-local BuyItem1 = {6,12,93,11} -- First buy
-local BuyItem2 = {25,2,150}
-local BuyItem3 = {28,20,14,74}
-local BuyItem4 = {8}
-local BuyItem5 = {8}
-local BuyItem6 = {167}
+local purchaseStartingItems = {, , } -- Ring of regen, courier, branches
+local BuyItem1 = {} -- First buy
+local BuyItem2 = {}
+local BuyItem3 = {}
+local BuyItem4 = {}
+local BuyItem5 = {}
+local BuyItem6 = {}
 local StepsOfBuy={BuyItem1,BuyItem2,BuyItem3,BuyItem4,BuyItem5,BuyItem6}
 local StepsOfPrice = {1825,1550,810,1600,1600,900}
 --===================--
