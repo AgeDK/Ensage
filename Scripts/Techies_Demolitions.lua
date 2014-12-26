@@ -9,7 +9,7 @@ require("libs.Utils")
 
 config = ScriptConfig.new()
 config:SetParameter("ShowMineRequired", true)
-config:SetParameter("Active", "Y", config.TYPE_HOTKEY)
+config:SetParameter("Active", "K", config.TYPE_HOTKEY)
 
 config:Load()
 
