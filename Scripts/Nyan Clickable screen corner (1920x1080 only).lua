@@ -11,6 +11,22 @@ config = ScriptConfig.new()
 config:Load()
 
 worldpos= nil
+-----------------------------------------------------------------------------------------------
+rects = {} -- right clicking version by Nyan (only for 1920x1080 resolution)
+-----------------------------------------------------------------------------------------------
+		-- top panels
+		rects[1] = {0,135,880,75+135}
+		rects[2] = {0,210,535,140+210}
+		rects[3] = {0,350,260,100+350}
+		rects[4] = {0,450,80,80+450}		
+		rects[5] = {0,45,1920,90+45}
+		rects[6] = {1920-880,135,1920,75+135}
+		rects[7] = {1920-535,210,1920,140+210}
+		rects[8] = {1920-260,350,1920,100+350}
+		rects[9] = {1920-80,450,1920,80+450}
+		-- shop panel
+		rects[0] = {1920-565,76,1920,80+774}
+-----------------------------------------------------------------------------------------------
 
 
 --Stuff
@@ -60,11 +76,21 @@ end
 function Key(msg,code)
 	if not PlayingGame() then return end
 	local me = entityList:GetMyHero() if not me then return end
-		if msg == RBUTTON_DOWN and OOB==true then
+		if msg == RBUTTON_DOWN and OOB==true and CheckIn() == true then
 			entityList:GetMyPlayer().selection[1]:Move(worldpos)
 		end
 	
 
+end
+
+function CheckIn()
+	local mx = client.mouseScreenPosition.x
+	local my = client.mouseScreenPosition.y	
+	if client.shopOpen == true and mx >= rects[0][1] and mx <= rects[0][3] and my >= rects[0][2] and my <= rects[0][4] then return false  end
+	for i=1,9 do
+		if mx >= rects[i][1] and mx <= rects[i][3] and my >= rects[i][2] and my <= rects[i][4] then return true  end
+	end
+	return false
 end
 
 
