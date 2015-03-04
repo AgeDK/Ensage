@@ -1,6 +1,3 @@
---<<Rework Aggro & UnAggro. Added returning to previous action.>>
--- Made by Staskkk
-
 require("libs.ScriptConfig")
 
 config = ScriptConfig.new()
