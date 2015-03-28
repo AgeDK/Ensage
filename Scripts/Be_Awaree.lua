@@ -4,7 +4,7 @@ require("libs.SideMessage")
 local play = false local isMoonlightCasted = false
 
 function Tick(tick)
-    if not PlayingGame() or not SleepCheck() or not play then return end
+    if not PlayingGame() or not SleepCheck() then return end
 	local hero = entityList:GetEntities({type=LuaEntity.TYPE_HERO})
 	for i,v in ipairs(hero) do
 		if v.team ~= team and not v:IsIllusion() then
@@ -42,14 +42,9 @@ end
 
 function Load()
 	if PlayingGame() then
-		local me = entityList:GetMyHero()
-		if not me then
-			script:Disable()
-		else
-			play = true
-			script:RegisterEvent(EVENT_TICK,Tick)
-			script:UnregisterEvent(Load)
-		end
+		play = true
+		script:RegisterEvent(EVENT_TICK,Tick)
+		script:UnregisterEvent(Load)
 	end
 end
 
