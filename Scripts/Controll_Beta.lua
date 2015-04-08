@@ -95,20 +95,27 @@ function Tick( tick )
 							if distance <= 1300 then
 								if v.name == "npc_dota_neutral_centaur_khan" then
 									if v:GetAbility(1):CanBeCasted() and distance < 200 and not disabled then
-										v:CastAbility(v:GetAbility(1),nil)
+										v:CastAbility(v:GetAbility(1))
 									end
 								elseif v.name == "npc_dota_neutral_satyr_hellcaller" then
-									if v:GetAbility(1):CanBeCasted() and distance < 980 then
+									if v:GetAbility(1):CanBeCasted() and distance < 850 then
 										v:CastAbility(v:GetAbility(1),target.position)
 									end						
 								elseif v.name == "npc_dota_neutral_polar_furbolg_ursa_warrior" then
-									if v:GetAbility(1):CanBeCasted() and distance < 300 then
-										v:CastAbility(v:GetAbility(1),nil)
+									if v:GetAbility(1):CanBeCasted() and distance < 240 then
+										v:CastAbility(v:GetAbility(1))
 									end							
 								elseif v.name == "npc_dota_neutral_dark_troll_warlord" then
 									if v:GetAbility(1):CanBeCasted() and distance < 550 and not disabled then
 										v:CastAbility(v:GetAbility(1),target)
-									end							
+									end	
+								elseif v.name == "npc_dota_neutral_big_thunder_lizard" then
+									if v:GetAbility(1):CanBeCasted() and distance < 250 then
+										v:CastAbility(v:GetAbility(1))
+									end
+									if v:GetAbility(2):CanBeCasted() then
+										v:CastAbility(v:GetAbility(2))
+									end					
 								end
 								if distance <= 1300 then
 									v:Attack(target)
@@ -206,10 +213,7 @@ function Tick( tick )
 				for i,v in ipairs(vf) do
 					if v.controllable and v.unitState ~= -1031241196 then
 						local distance = GetDistance2D(v,target)
-						if v:GetAbility(1):CanBeCasted() and distance <= 110 and not disabled then
-							v:CastAbility(v:GetAbility(1))
-						end
-						if v.health/v.maxHealth < 0.25 and v:GetAbility(1):CanBeCasted() then
+						if v.health/v.maxHealth < 0.26 and v:GetAbility(1):CanBeCasted() then
 							v:CastAbility(v:GetAbility(1))
 						end
 						if distance <= 1300 then
@@ -259,7 +263,7 @@ function Tick( tick )
 			end
 		end
 	end
-	sleepTick = tick + 500
+	sleepTick = tick + 250
 end
 
 function isPosEqual(v1, v2, d)
@@ -277,6 +281,7 @@ end
 
 function Close()
 	eff = {}
+	ordered = {}
 	activated = false
 	stack = false
 	creepHandle = nil
