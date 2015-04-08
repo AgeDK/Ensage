@@ -9,9 +9,12 @@ function OnLoadTick()
 		return
 	end
 	
-	if loaded == false and entityList:GetMyHero() ~= nil then
+	if loaded == false then
 		print("NyanShowIllusions: Loaded! ^__^")
 		
+		me = entityList:GetMyPlayer()
+		if me == nil then return end
+				
 		loaded = true		
 		script:RegisterEvent(EVENT_TICK, MainTick)	
 	end
