@@ -20,7 +20,7 @@ function Tick(tick)
 			GenerateSideMessage("bloodseeker","bloodseeker_thirst") Sleep(15000,"bloodseeker")
 		elseif SleepCheck("invoker") and me:FindModifier("modifier_invoker_ghost_walk_enemy") then
 			GenerateSideMessage("invoker","invoker_ghost_walk") Sleep(10000,"invoker")
-		elseif SleepCheck("oracle") and v.name == "npc_dota_hero_oracle" and v:GetAbility(4).abilityPhase then
+		elseif SleepCheck("oracle") and v.name == "npc_dota_hero_oracle" and v:GetAbility(4) and v:GetAbility(4).level > 0 and v:GetAbility(4).abilityPhase then
 			GenerateSideMessage("oracle","oracle_false_promise") Sleep(10000,"oracle")
 		elseif SleepCheck("shadowblade") and v:FindModifier("modifier_item_invisibility_edge_windwalk") then
 			ItemSideMessage(v.name:gsub("npc_dota_hero_",""),"invis_sword") Sleep(10000,"shadowblade") 
