@@ -3,12 +3,12 @@ require("libs.TargetFind")
 require("libs.Utils")
 
 config = ScriptConfig.new()
-config:SetParameter("combokey", "D", config.TYPE_HOTKEY)
-config:SetParameter("lasthitforcreep", "E", config.TYPE_HOTKEY)
+config:SetParameter("combo", "32", config.TYPE_HOTKEY)
+config:SetParameter("lasthit", "D", config.TYPE_HOTKEY)
 config:Load()
 
-hotkey1 = config.combokey
-hotkey2 = config.lasthitforcreep
+hotkey1 = config.combo
+hotkey2 = config.lasthit
 
 local play = false local myhero = nil local victim = nil local start = false local resettime = nil local dmg = {60,100,140,180}
 local monitor = client.screenSize.x/1600
@@ -24,9 +24,9 @@ function Tick(tick)
 		local Q = me:GetAbility(1)
 		local creeps = entityList:FindEntities({classId=CDOTA_BaseNPC_Creep_Lane,team=TEAM_ENEMY,alive=true,visible=true,team = me:GetEnemyTeam()})
 		for i,v in ipairs(creeps) do
-			if SleepCheck("lasthit") and GetDistance2D(v,me) < 1200 and Q:CanBeCasted() and me:CanCast() and (v.health > 0 and v.health < dmg[Q.level]) then
+			if SleepCheck("lasthit") and Q and Q:CanBeCasted() and (v.health > 0 and v.health < dmg[Q.level]) and GetDistance2D(v,me) <= Q.castRange then
 				me:CastAbility(Q,v)
-				Sleep(1000+me:GetTurnTime(v)*700,"lasthit")
+				Sleep(1000+me:GetTurnTime(v)*1000,"lasthit")
 			end
 		end
 	end
@@ -59,41 +59,47 @@ function Tick(tick)
 
 		if victim and SleepCheck("combo") then
 			local Q = me:GetAbility(1) local W = me:GetAbility(2)
+			local medallion = me:FindItem("item_medallion_of_courage")
 			local abyssal = me:FindItem("item_abyssal_blade")
 			local butterfly = me:FindItem("item_butterfly")
 			local mom = me:FindItem("item_mask_of_madness")
 			local satanic = me:FindItem("item_satanic")
-			if SleepCheck("follow") and GetDistance2D(victim,me) <= 1500 then
+			local disabled = victim:DoesHaveModifier("modifier_sheepstick_debuff") or victim:DoesHaveModifier("modifier_lion_voodoo_restoration") or victim:DoesHaveModifier("modifier_shadow_shaman_voodoo_restoration") or victim:IsStunned()
+			if SleepCheck("follow") and GetDistance2D(victim,me) <= 3000 then
 				me:Attack(victim)
-				Sleep(1000+me:GetTurnTime(victim)*3500,"follow")
+				Sleep(1000+me:GetTurnTime(victim)*1000,"follow")
 			end
 			if Q and Q:CanBeCasted() and GetDistance2D(victim,me) <= Q.castRange then
 				me:CastAbility(Q,victim)
-				Sleep(1000+me:GetTurnTime(victim)*700,"combo")
+				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
 			if W and W:CanBeCasted() and GetDistance2D(victim,me) <= W.castRange then
 				me:CastAbility(W,victim)
-				Sleep(1000+me:GetTurnTime(victim)*700,"combo")
+				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
-			if abyssal and abyssal:CanBeCasted() and GetDistance2D(victim,me) <= abyssal.castRange then
+			if medallion and medallion:CanBeCasted() and GetDistance2D(victim,me) <= me.attackRange then
+				me:CastAbility(medallion,victim)
+				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
+			end
+			if abyssal and abyssal:CanBeCasted() and GetDistance2D(victim,me) <= abyssal.castRange and not disabled then
 				me:CastAbility(abyssal,victim)
-				Sleep(1000+me:GetTurnTime(victim)*700,"combo")
+				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
 			if butterfly and butterfly:CanBeCasted() and GetDistance2D(victim,me) <= 3000 then
 				me:CastAbility(butterfly)
-				Sleep(1000+me:GetTurnTime(victim)*700,"combo")
+				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
 			if mom and mom:CanBeCasted() and GetDistance2D(victim,me) <= me.attackRange then
 				me:CastAbility(mom)
-				Sleep(1000+me:GetTurnTime(victim)*700,"combo")
+				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
-			if satanic and satanic:CanBeCasted() and me.health/me.maxHealth < 0.5 then
-				me:CastAbility(mom)
-				Sleep(1000+me:GetTurnTime(victim)*700,"combo")
+			if satanic and satanic:CanBeCasted() and me.health/me.maxHealth <= 0.5 then
+				me:CastAbility(satanic)
+				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
 		end
 	elseif victim then
-			if not resettime then
+		if not resettime then
 			resettime = client.gameTime
 		elseif (client.gameTime - resettime) >= 6 then
 			victim = nil		
