@@ -13,7 +13,7 @@ hotkey2 = config.lasthit
 local play = false local myhero = nil local victim = nil local start = false local resettime = nil local dmg = {60,100,140,180}
 local monitor = client.screenSize.x/1600
 local F14 = drawMgr:CreateFont("F14","Tahoma",14*monitor,550*monitor) 
-local victimText = drawMgr:CreateText(-50*monitor,1*monitor,0xFFFF00FF,"Doing rape this kid!",F14) victimText.visible = false
+local victimText = drawMgr:CreateText(-50*monitor,1*monitor,0xFFFF00FF,"Going rape this kid!",F14) victimText.visible = false
 
 function Tick(tick)
 	if not PlayingGame() then return end
@@ -64,7 +64,7 @@ function Tick(tick)
 			local butterfly = me:FindItem("item_butterfly")
 			local mom = me:FindItem("item_mask_of_madness")
 			local satanic = me:FindItem("item_satanic")
-			local disabled = victim:DoesHaveModifier("modifier_sheepstick_debuff") or victim:DoesHaveModifier("modifier_lion_voodoo_restoration") or victim:DoesHaveModifier("modifier_shadow_shaman_voodoo_restoration") or victim:IsStunned()
+			local Stuff = victim:IsSilenced() or victim:IsHexed() or victim:IsStunned() or victim:IsLinkensProtected()
 			if SleepCheck("follow") and GetDistance2D(victim,me) <= 3000 then
 				me:Attack(victim)
 				Sleep(1000+me:GetTurnTime(victim)*1000,"follow")
@@ -81,7 +81,7 @@ function Tick(tick)
 				me:CastAbility(medallion,victim)
 				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
-			if abyssal and abyssal:CanBeCasted() and GetDistance2D(victim,me) <= abyssal.castRange and not disabled then
+			if abyssal and abyssal:CanBeCasted() and GetDistance2D(victim,me) <= abyssal.castRange and not Stuff then
 				me:CastAbility(abyssal,victim)
 				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
@@ -93,7 +93,7 @@ function Tick(tick)
 				me:CastAbility(mom)
 				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
-			if satanic and satanic:CanBeCasted() and me.health/me.maxHealth <= 0.5 then
+			if satanic and satanic:CanBeCasted() and me.health/me.maxHealth <= 0.4 and GetDistance2D(victim,me) <= me.attackRange then
 				me:CastAbility(satanic)
 				Sleep(1000+me:GetTurnTime(victim)*1000,"combo")
 			end
