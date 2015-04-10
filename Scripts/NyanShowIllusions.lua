@@ -1,31 +1,20 @@
-local heroTable = {}
-local illusionTable = {}
-local me = nil
-local loaded = false 
-local sleepTick = 0
+-- Load
+
+local heroTable = {} local illusionTable = {} local me = nil local loaded = false  local sleepTick = 0
 
 function OnLoadTick()
-	if not client.connected or client.loading or client.console then
-		return
-	end
+	if not PlayingGame() then return end
+	me = entityList:GetMyHero() if not me then return end
 	
 	if loaded == false then
-		print("NyanShowIllusions: Loaded! ^__^")
-		
-		me = entityList:GetMyPlayer()
-		if me == nil then return end
-				
+		print("Nyan Show Illusions: Loaded! ^__^")
 		loaded = true		
 		script:RegisterEvent(EVENT_TICK, MainTick)	
 	end
 end
 
 function MainTick(tick)
-	if not client.connected or client.loading or client.console or tick < sleepTick then
-		return
-	end
-	
-	me = entityList:GetMyPlayer()
+	if not PlayingGame() or tick < sleepTick then return end
 	
 	local illusions = entityList:FindEntities({type=LuaEntity.TYPE_HERO,illusion=true,team = (5-me.team)})	--
 	local clear = false
