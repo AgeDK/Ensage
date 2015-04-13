@@ -12,8 +12,8 @@ local play = false
 
 function Tick(tick)
 	if not PlayingGame() then return end
-	local me = entityList:GetMyHero() local mp = entityList:GetMyPlayer()  local sel = mp.selection[1]
-	local scroll = sel:FindItem("item_tpscroll") or sel:FindItem("item_travel_boots")
+	
+	local mp = entityList:GetMyPlayer()  local sel = mp.selection[1]
 
 	if mp.team == LuaEntity.TEAM_RADIANT then
 		foun = Vector(-7272,-6757,270)
@@ -22,6 +22,7 @@ function Tick(tick)
 	end
 
 	if IsKeyDown(toggleKey) and not client.chat then
+		local scroll = sel:FindItem("item_tpscroll") or sel:FindItem("item_travel_boots")
 		if SleepCheck("scroll") and scroll and scroll:CanBeCasted() then
 			sel:CastAbility(scroll,foun) Sleep(700,"scroll")
 		end
