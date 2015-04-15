@@ -9,7 +9,6 @@ config:SetParameter("Hotkey", "32", config.TYPE_HOTKEY)
 config:Load()
 	
 toggleKey = config.Hotkey
-sleep = 0
 
 local play = false local myhero = nil local victim = nil local attack = 0 local move = 0 local start = false local resettime = nil local movetomouse = nil
 
@@ -166,7 +165,6 @@ function Load()
 			play = true
 			victim = nil
 			start = false
-			sleep = 0 
 			resettime = nil
 			myhero = me.classId
 			script:RegisterEvent(EVENT_FRAME, Main)
