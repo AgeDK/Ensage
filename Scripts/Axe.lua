@@ -5,11 +5,9 @@ require("libs.SkillShot")
 require("libs.Animations")
 
 local config = ScriptConfig.new()
-config:SetParameter("Hotkey", "D", config.TYPE_HOTKEY)
-config:SetParameter("CallHotkey", "F", config.TYPE_HOTKEY)
+config:SetParameter("Hotkey", "116", config.TYPE_HOTKEY)
+config:SetParameter("CallHotkey", "117", config.TYPE_HOTKEY)
 config:Load()
-
-local toggleKey = config.Hotkey
 
 local hero = {} local reg = false
 local active = true local myhero = nil local callactive = true local callvictim = nil
@@ -21,18 +19,15 @@ local blink = drawMgr:CreateRect(-25,-70,35,20,0x000000ff) blink.visible = false
 
 function Tick(tick)
 	if not PlayingGame() then return end
-	local me = entityList:GetMyHero() if not me then return end
-	local ID = me.classId if ID ~= myhero then Close() end
-
+	local me = entityList:GetMyHero()
+	local ID = me.classId if ID ~= myhero then return end
+	local call = me:GetAbility(1) local Cullblade = me:GetAbility(4) local Blink = me:FindItem("item_blink")
+	
 	cullingblade.entity = me 
 	cullingblade.entityPosition = Vector(0,0,me.healthbarOffset)
 	blink.entity = me 
 	blink.entityPosition = Vector(0,0,me.healthbarOffset)
-	
-	local Cullblade = me:GetAbility(4)
-	local Blink = me:FindItem("item_blink")
-	local call = me:GetAbility(1)
-	
+
 	if Cullblade.level > 0 or call.level > 0 then
 		cullingblade.textureId = drawMgr:GetTextureId("NyanUI/Spellicons/axe_culling_blade")
 		cullingblade.visible = active
@@ -117,7 +112,7 @@ function Key(msg,code)
 	if msg ~= KEY_UP or not PlayingGame() or client.chat then
 		return
 	end
-	if code == toggleKey then
+	if code == config.Hotkey then
 		active = not active
 		return true
 	elseif code == config.CallHotkey then
