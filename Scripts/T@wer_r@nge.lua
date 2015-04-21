@@ -1,5 +1,4 @@
-local Play = false
-local eff = {}
+local Play = false local eff = {}
 
 function Tick(tick)
     if not PlayingGame() then return end
