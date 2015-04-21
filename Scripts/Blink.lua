@@ -1,13 +1,11 @@
 require("libs.ScriptConfig")
 require("libs.Utils")
 
-config = ScriptConfig.new()
+local config = ScriptConfig.new()
 config:SetParameter("hotkey", "F", config.TYPE_HOTKEY)
 config:Load()
 
-toggleKey = config.hotkey
-
-local eff = {} local play = false
+local eff = {} local play = false local sleep = 0
 
 function Tick(tick)
     if not PlayingGame() then return end
@@ -18,20 +16,21 @@ function Tick(tick)
         eff[me.handle]:SetVector(1, Vector(1200,0,0))
     end
     
-    if IsKeyDown(toggleKey) and not client.chat then
+    if IsKeyDown(config.hotkey) and not client.chat then
         local blink = me:FindItem("item_blink")
         local distance = math.sqrt(math.pow(client.mousePosition.x - me.position.x, 2) + math.pow(client.mousePosition.y - me.position.y, 2))
         local expectedY = ((client.mousePosition.y - me.position.y) / distance) * 1199 + me.position.y
         local expectedX = ((client.mousePosition.x - me.position.x) / distance) * 1199 + me.position.x
         local blinkPosition = Vector(expectedX, expectedY, 0)
 
-        if blink and blink:CanBeCasted() then
+        if tick > sleep and blink and blink:CanBeCasted() then
             if distance > 0 and distance > 1200 then
                 me:CastAbility(blink, blinkPosition)
             else
                 me:CastAbility(blink, Vector(client.mousePosition.x, client.mousePosition.y, 0))
             end
         end
+        sleep = tick + 250
     end
 end
 
