@@ -1,12 +1,5 @@
 --<<Show spawn boxes blocking areas>>
 require("libs.Utils")
-require("libs.ScriptConfig")
-
-config = ScriptConfig.new()
-config:SetParameter("boxs", true)
-config:Load()
-
-showmebox = config.boxs
 
 local play = false
 
@@ -39,7 +32,7 @@ function Tick(tick)
     local me = entityList:GetMyHero()
     local effec = "origin_gizmo"
 	for i,k in ipairs(spots) do
-		if not eff[i] and showmebox then
+		if not eff[i] then
 			local coint1 = math.floor(math.floor(k[3]-k[1])/50)
 			local coint2 = math.floor(math.floor(k[2]-k[4])/50)
 			eff[i] = {}		
@@ -65,7 +58,6 @@ function Tick(tick)
 				eff[i].eff2[a]:SetVector(0,GetVector(first,k[5]))				
 				eff[i].eff4[a] = Effect(second,effec)
 				eff[i].eff4[a]:SetVector(0,GetVector(second,k[5]))
-				collectgarbage("collect")
 			end	
 		end
 	end
