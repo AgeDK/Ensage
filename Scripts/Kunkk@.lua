@@ -4,8 +4,8 @@ require("libs.ScriptConfig")
 require("libs.Utils")
 
 local config = ScriptConfig.new()
-config:SetParameter("HotKey", "32", config.TYPE_HOTKEY)
-config:SetParameter("HomeKey", "D", config.TYPE_HOTKEY)
+config:SetParameter("HotKey", "D", config.TYPE_HOTKEY)
+config:SetParameter("HomeKey", "F", config.TYPE_HOTKEY)
 config:Load()
 
 local play = false local myhero = nil local victim = nil
@@ -113,7 +113,9 @@ end
 function Close()
 	myhero = nil
 	victim = nil
-	start = false
+	for i = 1, #rec do
+		rec[i].visible = false
+	end
 	collectgarbage("collect")
 	if play then
 		script:UnregisterEvent(Tick)
