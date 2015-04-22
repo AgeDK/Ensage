@@ -2,14 +2,15 @@
 
 require("libs.ScriptConfig")
 require("libs.Utils")
-require("libs.Skillshot")
+require("libs.TargetFind")
 require("libs.Animations")
+require("libs.Skillshot")
 
 local config = ScriptConfig.new()
-config:SetParameter("Hotkey", "32", config.TYPE_HOTKEY)
+config:SetParameter("Hotkey", "T", config.TYPE_HOTKEY)
 config:Load()
 
-local play = false local myhero = nil local victim = nil local attack = 0 local move = 0
+local play = false local myhero = nil local victim = nil local start = false local resettime = nil local sleep = {0,0}
 local rate = client.screenSize.x/1600 local rec = {}
 rec[1] = drawMgr:CreateRect(70*rate,26*rate,270*rate,60*rate,0xFFFFFF30,drawMgr:GetTextureId("NyanUI/other/CM_status_1")) rec[1].visible = false
 rec[2] = drawMgr:CreateText(175*rate,52*rate,0xFFFFFF90,"Target :",drawMgr:CreateFont("manabarsFont","Arial",18*rate,700)) rec[2].visible = false
@@ -19,18 +20,35 @@ function Main(tick)
 	if not PlayingGame() then return end
 	local me = entityList:GetMyHero()
 	local ID = me.classId if ID ~= myhero then return end
-	if IsKeyDown(config.Hotkey) and not client.chat then
-		local victim = FindTarget(me.team)
-		rec[1].w = 90*rate + 30*0*rate + 65*rate
-		rec[2].x = 30*rate + 90*rate + 30*0*rate + 65*rate - 95*rate
-		rec[3].x = 80*rate + 90*rate + 30*0*rate + 65*rate - 50*rate
-		rec[3].textureId = drawMgr:GetTextureId("NyanUI/miniheroes/"..victim.name:gsub("npc_dota_hero_",""))
-		for z = 1,3 do
-			rec[z].visible = true
+
+	if victim and victim.visible then
+		if not rec[i] then
+			rec[3].textureId = drawMgr:GetTextureId("NyanUI/miniheroes/"..victim.name:gsub("npc_dota_hero_",""))
 		end
-		if not Animations.CanMove(me) and victim and victim.alive and GetDistance2D(me,victim) <= 2000 then
-			if tick > attack and SleepCheck("casting") then
-				if victim and not Animations.isAttacking(me) then
+	else
+		rec[3].textureId = drawMgr:GetTextureId("NyanUI/spellicons/doom_bringer_empty1")
+	end
+
+	local attackRange = me.attackRange	
+
+	if IsKeyDown(config.Hotkey) and not client.chat then	
+		if Animations.CanMove(me) or not start or (victim and GetDistance2D(victim,me) > attackRange+50) then
+			start = true
+			local lowestHP = targetFind:GetLowestEHP(3000, phys)
+			if lowestHP and (not victim or victim.creep or GetDistance2D(me,victim) > 600 or not victim.alive or lowestHP.health < victim.health) and SleepCheck("victim") then			
+				victim = lowestHP
+				Sleep(250,"victim")
+			end
+			if victim and GetDistance2D(victim,me) > attackRange+200 and victim.visible then
+				local closest = targetFind:GetClosestToMouse(me,2000)
+				if closest and (not victim or closest.handle ~= victim.handle) then 
+					victim = closest
+				end
+			end
+		end
+		if not Animations.CanMove(me) and victim and GetDistance2D(me,victim) <= 2000 then
+			if tick > sleep[1] and SleepCheck("casting") then
+				if victim.hero and not Animations.isAttacking(me) then
 					local Q = me:GetAbility(1)
 					local R = me:GetAbility(4) 
 					local W = me:GetAbility(2)
@@ -47,17 +65,17 @@ function Main(tick)
 						local delay = ((480-Animations.getDuration(R)*1000)+CP*1000+client.latency+me:GetTurnTime(victim)*1000)
 						local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
 						local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
-						if xyz and distance <= 1600 then 
+						if xyz then 
 							me:CastAbility(R,xyz)
 							Sleep(CP*1000+me:GetTurnTime(victim)*1000, "casting")
 						end
 					end
-					if W and W:CanBeCasted() and not disable and distance <= W.castRange then
-						me:CastAbility(W,victim)
+					if Q and Q:CanBeCasted() and distance <= 260 then
+						me:CastAbility(Q)
 						Sleep(me:GetTurnTime(victim)*1000, "casting")
 					end
-					if Q and Q:CanBeCasted() and distance <= 260 and not Overload then
-						me:CastAbility(Q)
+					if W and W:CanBeCasted() and not disable and distance <= W.castRange then
+						me:CastAbility(W,victim)
 						Sleep(me:GetTurnTime(victim)*1000, "casting")
 					end
 					if Orchid and Orchid:CanBeCasted() and not disable then
@@ -78,32 +96,30 @@ function Main(tick)
 					end
 				end
 				me:Attack(victim)
-				attack = tick + 100
+				sleep[1] = tick + 100
 			end
-			if tick > move and victim then
+		elseif tick > sleep[2] then
+			if victim then
 				if victim.visible then
 					local xyz = SkillShot.PredictedXYZ(victim,me:GetTurnTime(victim)*1000+client.latency+500)
 					me:Move(xyz)
 				else
 					me:Follow(victim)
 				end
+			else
+				me:Move(client.mousePosition)
 			end
-			move = tick + 100
+			sleep[2] = tick + 100
+			start = false
 		end
-	end
-end
-
-function FindTarget(teams)
-	local enemy = entityList:GetEntities(function (v) return v.type == LuaEntity.TYPE_HERO and v.team ~= teams and v.visible and v.alive and not v.illusion end)
-	if #enemy == 0 then
-		return entityList:GetEntities(function (v) return v.type == LuaEntity.TYPE_HERO and v.team ~= teams end)[1]
-	elseif #enemy == 1 then
-		return enemy[1]	
-	else
-		local mouse = client.mousePosition
-		table.sort( enemy, function (a,b) return GetDistance2D(mouse,a) < GetDistance2D(mouse,b) end)
-		return enemy[1]
-	end
+	elseif victim then
+			if not resettime then
+			resettime = client.gameTime
+		elseif (client.gameTime - resettime) >= 6 then
+			victim = nil		
+		end
+		start = false
+	end 
 end
 
 function Load()
@@ -113,7 +129,13 @@ function Load()
 			script:Disable() 
 		else
 			play = true
+			victim = nil
+			start = false
+			resettime = nil
 			myhero = me.classId
+			rec[1].w = 90*rate + 30*0*rate + 65*rate rec[1].visible = true
+			rec[2].x = 30*rate + 90*rate + 30*0*rate + 65*rate - 95*rate rec[2].visible = true
+			rec[3].x = 80*rate + 90*rate + 30*0*rate + 65*rate - 50*rate rec[3].visible = true
 			script:RegisterEvent(EVENT_FRAME, Main)
 			script:UnregisterEvent(Load)
 		end
@@ -123,6 +145,8 @@ end
 function Close()
 	myhero = nil
 	victim = nil
+	start = false
+	resettime = nil
 	for i = 1, #rec do
 		rec[i].visible = false
 	end
