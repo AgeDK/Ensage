@@ -123,8 +123,6 @@ function Main(tick)
 				else
 					me:Follow(victim)
 				end
-			else
-				me:Move(client.mousePosition)
 			end
 			sleep[2] = tick + 100
 			start = false
@@ -164,12 +162,11 @@ function Close()
 	victim = nil
 	start = false
 	resettime = nil
-	for i = 1, #rec do
-		rec[i].visible = false
-	end
-	collectgarbage("collect")
+	rec[1].visible = false
+	rec[2].visible = false
+	rec[3].visible = false
 	if play then
-		script:UnregisterEvent(Tick)
+		script:UnregisterEvent(Main)
 		script:RegisterEvent(EVENT_TICK,Load)
 		play = false
 	end
