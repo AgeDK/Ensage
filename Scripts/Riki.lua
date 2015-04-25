@@ -6,7 +6,7 @@ require("libs.Skillshot")
 require("libs.Animations")
 
 local config = ScriptConfig.new()
-config:SetParameter("Hotkey", "E", config.TYPE_HOTKEY)
+config:SetParameter("Hotkey", "32", config.TYPE_HOTKEY)
 config:Load()
 
 local play = false local myhero = nil local victim = nil local start = false local resettime = nil local sleep = {0,0}
