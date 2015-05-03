@@ -7,7 +7,7 @@ require("libs.Animations")
 require("libs.Skillshot")
 
 local config = ScriptConfig.new()
-config:SetParameter("hotkey", "F", config.TYPE_HOTKEY)
+config:SetParameter("hotkey", "32", config.TYPE_HOTKEY)
 config:SetParameter("blink", true)
 config:SetParameter("rearm", true)
 config:Load()
@@ -31,6 +31,22 @@ function Main(tick)
 		rec[3].textureId = drawMgr:GetTextureId("NyanUI/spellicons/doom_bringer_empty1")
 	end
 
+	for i=1,#castQueue,1 do
+		local v = castQueue[1]
+		table.remove(castQueue,1)
+		local ability = v[2]
+		if type(ability) == "string" then
+			ability = me:FindItem(ability)
+		end
+		if ability and ((me:SafeCastAbility(ability,v[3],false)) or (v[4] and ability:CanBeCasted())) then
+			if v[4] and ability:CanBeCasted() then
+				me:CastAbility(ability,v[3],false)
+			end
+			sleep[1] = tick + v[1] + client.latency
+			return
+		end
+	end
+
 	local attackRange = me.attackRange	
 
 	if IsKeyDown(config.hotkey) and not client.chat then	
@@ -46,21 +62,6 @@ function Main(tick)
 				if closest and (not victim or closest.handle ~= victim.handle) then 
 					victim = closest
 				end
-			end
-		end
-		for i=1,#castQueue,1 do
-			local v = castQueue[1]
-			table.remove(castQueue,1)
-			local ability = v[2]
-			if type(ability) == "string" then
-				ability = me:FindItem(ability)
-			end
-			if ability and ((me:SafeCastAbility(ability,v[3],false)) or (v[4] and ability:CanBeCasted())) then
-				if v[4] and ability:CanBeCasted() then
-					me:CastAbility(ability,v[3],false)
-				end
-				sleep[1] = tick + v[1] + client.latency
-				return
 			end
 		end
 		if not Animations.CanMove(me) and victim and GetDistance2D(me,victim) <= 2000 then
@@ -81,7 +82,7 @@ function Main(tick)
 					if not rearm then
 						if blink and blink:CanBeCasted() and me:CanCast() and distance > attackRange and config.blink then
 							local CP = blink:FindCastPoint()
-							local delay = ((500-Animations.getDuration(R)*1000)+CP*1000+client.latency+me:GetTurnTime(victim)*1000)
+							local delay = ((500-Animations.getDuration(blink)*1000)+CP*1000+client.latency+me:GetTurnTime(victim)*1000)
 							local speed = blink:GetSpecialData("blink_range")
 							local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
 							if xyz then
@@ -113,25 +114,25 @@ function Main(tick)
 							if dagon and not ethereal and not sheep and R and R:CanBeCasted() and me:CanCast() then
 								if dagon.cd ~= 0 and W.cd ~= 0 then
 									table.insert(castQueue,{1000+math.ceil(R:FindCastPoint()*1000),R})
-									Sleep(1000,"123")
+									Sleep(1100+client.latency,"123")
 								end
 							end
 							if dagon and ethereal and not sheep and R and R:CanBeCasted() and me:CanCast() then
 								if dagon.cd ~= 0 and ethereal.cd ~= 0 and W.cd ~= 0 then
 									table.insert(castQueue,{1000+math.ceil(R:FindCastPoint()*1000),R})
-									Sleep(1000,"123")
+									Sleep(1100+client.latency,"123")
 								end
 							end
 							if dagon and not ethereal and sheep and R and R:CanBeCasted() and me:CanCast() then
 								if dagon.cd ~= 0 and sheep.cd ~= 0 and W.cd ~= 0 then
 									table.insert(castQueue,{1000+math.ceil(R:FindCastPoint()*1000),R})
-									Sleep(1000,"123")
+									Sleep(1100+client.latency,"123")
 								end
 							end
 							if dagon and ethereal and sheep and R and R:CanBeCasted() and me:CanCast() then
 								if dagon.cd ~= 0 and ethereal.cd ~= 0 and sheep.cd ~= 0 and W.cd ~= 0 then
 									table.insert(castQueue,{1000+math.ceil(R:FindCastPoint()*1000),R})
-									Sleep(1000,"123")
+									Sleep(1100+client.latency,"123")
 								end
 							end
 						end
@@ -156,7 +157,7 @@ function Main(tick)
 			start = false
 		end
 	elseif victim then
-			if not resettime then
+		if not resettime then
 			resettime = client.gameTime
 		elseif (client.gameTime - resettime) >= 2 then
 			victim = nil		
