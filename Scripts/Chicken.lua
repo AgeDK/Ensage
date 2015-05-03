@@ -33,7 +33,7 @@ function Tick(tick)
 	if chicken then
 		if tick > delay and SleepCheck("chicken") then
 			local bottle = me:FindItem("item_bottle")
-			local enemy = entityList:GetEntities(function (v) return (v.type==LuaEntity.TYPE_HERO or v.classId==323 or v.classId==527) and v.team ~= me.team and v.alive and v.visible end)
+			local enemy = entityList:GetEntities(function (v) return (v.type==LuaEntity.TYPE_HERO or v.classId==CDOTA_BaseNPC_Tower or v.classId==CDOTA_Unit_SpiritBear) and v.team ~= me.team and v.alive and v.visible end)
 			for i,v in ipairs(enemy) do
 				if GetDistance2D(chicken,v) <= config.distance and chicken:GetAbility(1):CanBeCasted() then
 					chicken:CastAbility(chicken:GetAbility(1))
@@ -47,52 +47,54 @@ function Tick(tick)
 			if activated and safety then
 				if bottle and bottle.charges == 0 then
 					giveitem = true
-					CheckStash(chicken)
 					chicken:Follow(me)
-					Boost(chicken)
-					Sleep(client.latency,"chicken")
+					checkbase(chicken)
+					boost(chicken)
+					Sleep(1000+client.latency,"chicken")
 				end
 				if GetDistance2D(chicken,me) <= 250 and bottle and bottle.charges == 0  then
 					giveitem = false
-					Deliver(chicken)
+					checkchicken(chicken)
 					mp:GiveItem(chicken,bottle)
-					Sleep(client.latency,"chicken")
+					Sleep(1000+client.latency,"chicken")
 				end
 				local chickenbottle = chicken:FindItem("item_bottle")
 				if chickenbottle and chickenbottle.charges == 0 and chicken:GetAbility(1):CanBeCasted() then
 					chicken:CastAbility(chicken:GetAbility(1))
-					Boost(chicken)
-					Sleep(client.latency,"chicken")
+					boost(chicken)
+					Sleep(1000+client.latency,"chicken")
 				end
 				if chickenbottle and chickenbottle.charges == 3 then
-					Deliver(chicken)
-					CheckStash(chicken)
-					Boost(chicken)
-					Sleep(client.latency,"chicken")
+					checkchicken(chicken)
+					checkbase(chicken)
+					boost(chicken)
+					Sleep(1000+client.latency,"chicken")
 				end
 			end
-			delay = tick + 320
+			delay = tick + 100
 		end
 	end
 end
 
-function Deliver(chicken)
+function checkbase(chicken)
+	for i = 7, 12 do
+		local item = entityList:GetMyHero():HasItem(i)
+		if item and chicken and chicken:GetAbility(4):CanBeCasted() then
+			chicken:CastAbility(chicken:GetAbility(4))
+		end
+	end
+end
+
+function checkchicken(chicken)
 	if chicken and chicken:GetAbility(5):CanBeCasted() then
 		chicken:CastAbility(chicken:GetAbility(5))
 	end
 end
 
-function Boost(chicken)
-	if chicken and chicken:GetAbility(6):CanBeCasted() then
-		chicken:CastAbility(chicken:GetAbility(6))
-	end
-end
-
-function CheckStash(chicken)
-	for i = 7, 12 do
-		local item = entityList:GetMyHero():HasItem(i)
-		if item and chicken and chicken:GetAbility(4):CanBeCasted() then
-			chicken:CastAbility(chicken:GetAbility(4))
+function boost(chicken)
+	if chicken:GetProperty("CDOTA_Unit_Courier","m_bFlyingCourier") then
+		if chicken and chicken:GetAbility(6):CanBeCasted() then
+			chicken:CastAbility(chicken:GetAbility(6))
 		end
 	end
 end
