@@ -35,7 +35,7 @@ function Main(tick)
 	if IsKeyDown(config.HotKey) and not client.chat then
 		target = targetFind:GetClosestToMouse(100)
 		if tick > sleep[1] then
-			if target and GetDistance2D(target,me) <= 2000 and not target:DoesHaveModifier("modifier_item_blade_mail_reflect") and not target:DoesHaveModifier("modifier_item_lotus_orb_active") and not target:IsMagicImmune() and target:CanDie() then
+			if target and target.alive and target.visible and GetDistance2D(target,me) <= 2000 and not target:DoesHaveModifier("modifier_item_blade_mail_reflect") and not target:DoesHaveModifier("modifier_item_lotus_orb_active") and not target:IsMagicImmune() and target:CanDie() then
 				local Q = me:GetAbility(1)
 				local W = me:GetAbility(2)
 				local R = me:GetAbility(4)
@@ -44,6 +44,7 @@ function Main(tick)
 				local ethereal = me:FindItem("item_ethereal_blade")
 				local veil = me:FindItem("item_veil_of_discord")
 				local soulring = me:FindItem("item_soul_ring")
+				local slow = target:DoesHaveModifier("modifier_item_ethereal_blade_slow")
 				if dagon and dagon:CanBeCasted() and me:CanCast() and target:DoesHaveModifier("modifier_item_veil_of_discord_debuff") then
 					table.insert(castQueue,{1000+math.ceil(dagon:FindCastPoint()*1000),dagon,target})
 					Sleep(me:GetTurnTime(target)*1000, "casting")
@@ -56,7 +57,7 @@ function Main(tick)
 				end
 				if W and W:CanBeCasted() and me:CanCast() then
 					local CP = W:FindCastPoint()
-					local delay = ((270-Animations.getDuration(W)*1000)+CP*1000+client.latency+me:GetTurnTime(target)*1000)
+					local delay = CP*1000+client.latency+me:GetTurnTime(target)*1000
 					local speed = W:GetSpecialData("true_sight_radius")
 					local xyz = SkillShot.SkillShotXYZ(me,target,delay,speed)
 					if xyz and distance <= 700 then 
@@ -78,7 +79,11 @@ function Main(tick)
 						table.insert(castQueue,{1000+math.ceil(R:FindCastPoint()*1000),R})
 					end
 				end
-				me:Attack(target)
+				if not slow then
+					me:Attack(target)
+				elseif slow then
+					me:Follow(target)
+				end
 				sleep[1] = tick + 100
 			end
 		end
