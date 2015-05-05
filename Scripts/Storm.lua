@@ -7,10 +7,10 @@ require("libs.Animations")
 require("libs.Skillshot")
 
 local config = ScriptConfig.new()
-config:SetParameter("Hotkey", "E", config.TYPE_HOTKEY)
+config:SetParameter("Hotkey", "32", config.TYPE_HOTKEY)
 config:Load()
 
-local play = false local myhero = nil local victim = nil local start = false local resettime = nil local sleep = {0,0}
+local play = false local myhero = nil local victim = nil local start = false local resettime = nil local sleep = {0,0,0}
 local rate = client.screenSize.x/1600 local rec = {} local castQueue = {}
 rec[1] = drawMgr:CreateRect(70*rate,26*rate,270*rate,60*rate,0xFFFFFF30,drawMgr:GetTextureId("NyanUI/other/CM_status_1")) rec[1].visible = false
 rec[2] = drawMgr:CreateText(175*rate,52*rate,0xFFFFFF90,"Target :",drawMgr:CreateFont("manabarsFont","Arial",18*rate,700)) rec[2].visible = false
@@ -27,6 +27,22 @@ function Main(tick)
 		end
 	else
 		rec[3].textureId = drawMgr:GetTextureId("NyanUI/spellicons/doom_bringer_empty1")
+	end
+
+	for i=1,#castQueue,1 do
+		local v = castQueue[1]
+		table.remove(castQueue,1)
+		local ability = v[2]
+		if type(ability) == "string" then
+			ability = me:FindItem(ability)
+		end
+		if ability and ((me:SafeCastAbility(ability,v[3],false)) or (v[4] and ability:CanBeCasted())) then
+			if v[4] and ability:CanBeCasted() then
+				me:CastAbility(ability,v[3],false)
+			end
+			sleep[3] = tick + v[1] + client.latency
+			return
+		end
 	end
 
 	local attackRange = me.attackRange	
@@ -46,21 +62,6 @@ function Main(tick)
 				end
 			end
 		end
-		for i=1,#castQueue,1 do
-			local v = castQueue[1]
-			table.remove(castQueue,1)
-			local ability = v[2]
-			if type(ability) == "string" then
-				ability = me:FindItem(ability)
-			end
-			if ability and ((me:SafeCastAbility(ability,v[3],false)) or (v[4] and ability:CanBeCasted())) then
-				if v[4] and ability:CanBeCasted() then
-					me:CastAbility(ability,v[3],false)
-				end
-				sleep[1] = tick + v[1] + client.latency
-				return
-			end
-		end
 		if not Animations.CanMove(me) and victim and GetDistance2D(me,victim) <= 2000 then
 			if tick > sleep[1] then
 				if not Animations.isAttacking(me) then
@@ -75,9 +76,9 @@ function Main(tick)
 					local distance = GetDistance2D(victim,me)
 					local disable = victim:IsSilenced() or victim:IsHexed() or victim:IsStunned() or victim:IsLinkensProtected()
 					local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
-					if R and R:CanBeCasted() and me:CanCast() and distance > me.attackRange and not balling and not R.abilityPhase then
+					if R and R:CanBeCasted() and me:CanCast() and distance > attackRange+50 and not balling and not R.abilityPhase then
 						local CP = R:FindCastPoint()
-						local delay = ((480-Animations.getDuration(R)*1000)+CP*1000+client.latency+me:GetTurnTime(victim)*1000)
+						local delay = ((270-Animations.getDuration(W)*1000)+CP*1000+client.latency+me:GetTurnTime(victim)*1000)
 						local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
 						local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
 						if xyz then 
@@ -119,7 +120,7 @@ function Main(tick)
 			start = false
 		end
 	elseif victim then
-			if not resettime then
+		if not resettime then
 			resettime = client.gameTime
 		elseif (client.gameTime - resettime) >= 2 then
 			victim = nil		
