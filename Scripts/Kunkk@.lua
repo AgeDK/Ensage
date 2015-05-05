@@ -4,12 +4,12 @@ require("libs.ScriptConfig")
 require("libs.Utils")
 
 local config = ScriptConfig.new()
-config:SetParameter("HotKey", "E", config.TYPE_HOTKEY)
+config:SetParameter("HotKey", "32", config.TYPE_HOTKEY)
 config:SetParameter("HomeKey", "D", config.TYPE_HOTKEY)
 config:Load()
 
-local play = false local myhero = nil local victim = nil local sleep = {0,0}
-local rate = client.screenSize.x/1600 local rec = {}
+local play = false local myhero = nil local target = nil local sleep = {0,0}
+local rate = client.screenSize.x/1600 local rec = {} local castQueue = {}
 rec[1] = drawMgr:CreateRect(70*rate,26*rate,270*rate,60*rate,0xFFFFFF30,drawMgr:GetTextureId("NyanUI/other/CM_status_1")) rec[1].visible = false
 rec[2] = drawMgr:CreateText(175*rate,52*rate,0xFFFFFF90,"Target :",drawMgr:CreateFont("manabarsFont","Arial",18*rate,700)) rec[2].visible = false
 rec[3] = drawMgr:CreateRect(220*rate,54*rate,16*rate,16*rate,0xFFFFFF30) rec[3].visible = false
@@ -18,10 +18,26 @@ function Main(tick)
 	if not PlayingGame() then return end
 	local me = entityList:GetMyHero()
 	local ID = me.classId if ID ~= myhero then return end
+
+	for i=1,#castQueue,1 do
+		local v = castQueue[1]
+		table.remove(castQueue,1)
+		local ability = v[2]
+		if type(ability) == "string" then
+			ability = me:FindItem(ability)
+		end
+		if ability and ((me:SafeCastAbility(ability,v[3],false)) or (v[4] and ability:CanBeCasted())) then
+			if v[4] and ability:CanBeCasted() then
+				me:CastAbility(ability,v[3],false)
+			end
+			sleep[1] = tick + v[1] + client.latency
+			return
+		end
+	end
 	
-	local Q = me:GetAbility(1)
-	local E = me:GetAbility(3)
-	local R = me:GetAbility(4)
+	local torrent = me:GetAbility(1)
+	local xmarks = me:GetAbility(3)
+	local ghostship = me:GetAbility(4)
 
 	if me.team == LuaEntity.TEAM_RADIANT then
 		foun = Vector(-7272,-6757,270)
@@ -31,64 +47,52 @@ function Main(tick)
 
 	if IsKeyDown(config.HomeKey) and not client.chat then
 		if tick > sleep[1] and me.alive then
-			local travel = me:FindItem("item_tpscroll") or me:FindItem("item_travel_boots")
-			if E and E:CanBeCasted() and travel and travel:CanBeCasted() then
-				me:CastAbility(E,me)
+			local travel = me:FindItem("item_tpscroll") or me:FindItem("item_travel_boots") or me:FindItem("item_travel_boots_2")
+			if xmarks and xmarks:CanBeCasted() and travel and travel:CanBeCasted() then
+				table.insert(castQueue,{1000+math.ceil(xmarks:FindCastPoint()*1000),xmarks,me})
 			end
 			if travel and travel:CanBeCasted() then
-				me:CastAbility(travel,foun)
+				table.insert(castQueue,{1000+math.ceil(travel:FindCastPoint()*1000),travel,foun})
 				sleep[1] = tick + 1000
 			end
 		end
 	end
 
-	local victim = FindTarget(me.team)
+	local target = targetFind:GetClosestToMouse(100)
 
-	if victim and victim.visible then
+	if target and target.visible then
 		if not rec[i] then
-			rec[3].textureId = drawMgr:GetTextureId("NyanUI/miniheroes/"..victim.name:gsub("npc_dota_hero_",""))
+			rec[3].textureId = drawMgr:GetTextureId("NyanUI/miniheroes/"..target.name:gsub("npc_dota_hero_",""))
 		end
 	else
 		rec[3].textureId = drawMgr:GetTextureId("NyanUI/spellicons/doom_bringer_empty1")
 	end
 	
-	if victim and tick > sleep[2] then
-		if E.name == "kunkka_x_marks_the_spot" and Q and Q:CanBeCasted() and E.level > 0 and E.abilityPhase then
-			me:CastAbility(Q,victim.position)
+	if target and target.alive and GetDistance2D(me,target) <= 2000 then
+		if  xmarks.name == "kunkka_x_marks_the_spot" and torrent and torrent:CanBeCasted() and xmarks.level > 0 and xmarks.abilityPhase then
+			table.insert(castQueue,{1000+math.ceil(torrent:FindCastPoint()*1000),torrent,target.position})
 		end
-		if E.name == "kunkka_return" and me:CanCast() and math.floor(Q.cd*10) == 110 + math.floor((client.latency/1100)) then
-			me:CastAbility(E)
+		if xmarks.name == "kunkka_return" and me:CanCast() and math.floor(torrent.cd*10) == 110 + math.floor((client.latency/1100)) then
+			table.insert(castQueue,{1000+math.ceil(xmarks:FindCastPoint()*1000),xmarks})
 		end
-
-		if IsKeyDown(config.HotKey) and not client.chat then
-			if E.name == "kunkka_x_marks_the_spot" and E:CanBeCasted() and me:CanCast() then
-				me:CastAbility(E,victim)
-				lastpos = victim.position
-			end
-			if R and R:CanBeCasted() and me:CanCast() and E.level > 0 and E.abilityPhase then
-				me:CastAbility(R,lastpos)
-			end
-			if Q and Q:CanBeCasted() and me:CanCast() and R.level > 0 and R.abilityPhase then
-				me:CastAbility(Q,lastpos)
-			end
-			if E.name == "kunkka_return" and me:CanCast() and math.floor(Q.cd*10) == 110 + math.floor((client.latency/1100)) then
-				me:CastAbility(E)
-			end
-		end
-		sleep[2] = tick + 100
 	end
-end
 
-function FindTarget(teams)
-	local enemy = entityList:GetEntities(function (v) return v.type == LuaEntity.TYPE_HERO and v.team ~= teams and v.visible and v.alive and not v.illusion end)
-	if #enemy == 0 then
-		return entityList:GetEntities(function (v) return v.type == LuaEntity.TYPE_HERO and v.team ~= teams and v.visible and v.alive and not v.illusion end)[1]
-	elseif #enemy == 1 then
-		return enemy[1]	
-	else
-		local mouse = client.mousePosition
-		table.sort( enemy, function (a,b) return GetDistance2D(mouse,a) < GetDistance2D(mouse,b) end)
-		return enemy[1]
+	if IsKeyDown(config.HotKey) and not client.chat then
+		if target and target.alive and GetDistance2D(me,target) <= 2000 then
+			if xmarks.name == "kunkka_x_marks_the_spot" and xmarks:CanBeCasted() and me:CanCast() then
+				table.insert(castQueue,{1000+math.ceil(xmarks:FindCastPoint()*1000),xmarks,target})
+				lastpos = target.position
+			end
+			if ghostship and ghostship:CanBeCasted() and me:CanCast() and xmarks.level > 0 and xmarks.abilityPhase then
+				table.insert(castQueue,{1000+math.ceil(ghostship:FindCastPoint()*1000),ghostship,lastpos})
+			end
+			if torrent and torrent:CanBeCasted() and me:CanCast() and ghostship.level > 0 and ghostship.abilityPhase then
+				table.insert(castQueue,{1000+math.ceil(torrent:FindCastPoint()*1000),torrent,lastpos})
+			end
+			if xmarks.name == "kunkka_return" and me:CanCast() and math.floor(torrent.cd*10) == 110 + math.floor((client.latency/1100)) then
+				table.insert(castQueue,{1000+math.ceil(xmarks:FindCastPoint()*1000),xmarks})
+			end
+		end
 	end
 end
 
@@ -108,9 +112,10 @@ function Load()
 		end
 	end	
 end
+
 function Close()
 	myhero = nil
-	victim = nil
+	target = nil
 	rec[1].visible = false
 	rec[2].visible = false
 	rec[3].visible = false
