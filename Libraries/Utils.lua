@@ -25,11 +25,11 @@ require("libs.HeroInfo")
 	====================================
 	|             Changelog            |
 	====================================
+		
 		v1.5a
 	   	 - Full compliance with the new 6.84 patch
 
 		v1.5
- 		
 		 - Rework dmg calculations:
 			*now it corrected calculate multi amplification/reduction dmg
 			*some improve performance
@@ -892,11 +892,19 @@ function GetCallerScript(index)
 end
 
 --Regular assert but if assert fails it traces the error
-function smartAssert(bool,string)
-	if not bool then
-    	print(debug.traceback())
-    	assert(bool,string)
-    end
+--using a "pcall()" in case the assertion msg arguments are wrong.
+function smartAssert(condition, ...)
+	if not condition then
+		if next({...}) then
+			local s,r = pcall(function (...) return(string.format(...)) end, ...)
+			if s then
+				print(debug.traceback())
+            			error("assertion failed!: " .. r, 2)
+         		end
+      		end
+		print(debug.traceback())
+		error("assertion failed!", 2)
+	end
 end
 
 --Returns the 2D distance (ignoring height) between 2 units.
@@ -1420,7 +1428,13 @@ function LuaEntityNPC:SafeCastAbility(ability,target,queue)
 	if type(target) == "boolean" then queue = target target = nil end
 	if ability and ability:CanBeCasted() and ((ability.item and self:CanUseItems()) or (not ability.item and self:CanCast())) and not (target and target.type == LuaEntity.TYPE_HERO and target.team ~= self.team and target:IsLinkensProtected() and ability:CanBeBlockedByLinkens() == true) then
 		local prev = SelectUnit(self)
-		if not target then
+		if ability:IsBehaviourType(LuaEntityAbility.BEHAVIOR_TOGGLE) then
+			if type(queue) == "boolean" then
+				entityList:GetMyPlayer():ToggleAbility(ability,queue)
+			else
+				entityList:GetMyPlayer():ToggleAbility(ability)
+			end
+		elseif not target then
 			if type(queue) == "boolean" then
 				entityList:GetMyPlayer():UseAbility(ability,queue)
 			else
@@ -2002,7 +2016,7 @@ function LuaEntityNPC:IsStunned()
 end
 
 function LuaEntityNPC:IsHexed()
-	return self:IsUnitState(LuaEntityNPC.STATE_HEXED)
+	return self:DoesHaveModifier("modifier_sheepstick_debuff") or self:DoesHaveModifier("modifier_shadow_shaman_voodoo") or self:DoesHaveModifier("modifier_lion_voodoo")
 end
 
 function LuaEntityNPC:IsInvisible()
