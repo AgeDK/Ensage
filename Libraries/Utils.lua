@@ -26,6 +26,9 @@ require("libs.HeroInfo")
 	|             Changelog            |
 	====================================
 		
+		v1.5b
+		 - Added modifier "ursa_enrage" in dmg calculator
+		
 		v1.5a
 	   	 - Full compliance with the new 6.84 patch
 
@@ -402,6 +405,14 @@ utils.externalDmgReducs = {
 		modifierName = "modifier_winter_wyvern_winters_curse",
 		type = 1,
 		reduce = .7,
+	},
+
+	
+	--Ursa: Enrage
+	{
+		modifierName = "modifier_ursa_enrage",
+		type = 1,
+		reduce = .8,
 	},
 
 	--[[Kunkka: Ghost Ship
@@ -2013,14 +2024,23 @@ end
 
 function LuaEntityNPC:IsStunned()
 	return self:IsUnitState(LuaEntityNPC.STATE_STUNNED)
+	-- return self:DoesHaveModifier("modifier_stun") or self:DoesHaveModifier("modifier_stunned") or self:DoesHaveModifier("modifier_techies_stasis_trap_stunned") or self:DoesHaveModifier("modifier_tiny_avalanche_stun") 
+	-- or self:DoesHaveModifier("modifier_crystal_maiden_frostbite_ministun") or self:DoesHaveModifier("modifier_earthshaker_fissure_stun") or self:DoesHaveModifier("modifier_faceless_void_time_lock_stun") or self:DoesHaveModifier("modifier_jakiro_ice_path_stun") 
+	-- or self:DoesHaveModifier("modifier_keeper_of_the_light_mana_leak_stun") or self:DoesHaveModifier("modifier_rubick_telekinesis_stun") or self:DoesHaveModifier("modifier_lina_light_strike_array") or self:DoesHaveModifier("modifier_kunkka_torrent") 
+	-- or self:DoesHaveModifier("modifier_lion_impale") or self:DoesHaveModifier("modifier_knockback")
 end
 
 function LuaEntityNPC:IsHexed()
-	return self:DoesHaveModifier("modifier_sheepstick_debuff") or self:DoesHaveModifier("modifier_shadow_shaman_voodoo") or self:DoesHaveModifier("modifier_lion_voodoo")
+	return self:IsUnitState(LuaEntityNPC.STATE_HEXED)
+	--return self:DoesHaveModifier("modifier_sheepstick_debuff") or self:DoesHaveModifier("modifier_shadow_shaman_voodoo") or self:DoesHaveModifier("modifier_lion_voodoo")
 end
 
 function LuaEntityNPC:IsInvisible()
 	return self:IsUnitState(LuaEntityNPC.STATE_INVISIBLE)
+	-- return self:DoesHaveModifier("modifier_invisible") or self:DoesHaveModifier("modifier_item_invisibility_edge_windwalk") or self:DoesHaveModifier("modifier_lycan_summon_wolves_invisibility") or self:DoesHaveModifier("modifier_persistent_invisibility") 
+	-- or self:DoesHaveModifier("modifier_phantom_lancer_doppelwalk_invis") or self:DoesHaveModifier("modifier_riki_permanent_invisibility") or self:DoesHaveModifier("modifier_rune_invis") or self:DoesHaveModifier("modifier_sandking_sand_storm_invis") 
+	-- or self:DoesHaveModifier("modifier_invoker_ghost_walk") or self:DoesHaveModifier("modifier_bounty_hunter_wind_walk") or self:DoesHaveModifier("modifier_brewmaster_storm_wind_walk") or self:DoesHaveModifier("modifier_brewmaster_wind_walk") 
+	-- or self:DoesHaveModifier("modifier_clinkz_wind_walk") or self:DoesHaveModifier("modifier_broodmother_spin_web_invisible_applier")
 end
 
 function LuaEntityNPC:IsInvul()
@@ -2028,6 +2048,8 @@ function LuaEntityNPC:IsInvul()
 end
 
 function LuaEntityNPC:IsMagicImmune()
+	-- return self:DoesHaveModifier("modifier_magicimmune") or self:DoesHaveModifier("modifier_magic_immune") or self:DoesHaveModifier("modifier_black_king_bar_immune") or self:DoesHaveModifier("modifier_juggernaut_blade_fury") or self:DoesHaveModifier("modifier_omniknight_repel") or
+	-- self:DoesHaveModifier("modifier_huskar_life_break_charge") or self:DoesHaveModifier("modifier_juggernaut_omnislash_invulnerability") or self:DoesHaveModifier("modifier_life_stealer_rage") 
 	return self:IsUnitState(LuaEntityNPC.STATE_MAGIC_IMMUNE)
 end
 
