@@ -1,7 +1,6 @@
 require("libs.Utils")
 require("libs.TargetFind")
 require("libs.ScriptConfig")
-require("libs.Animations")
 require("libs.Skillshot")
 
 local config = ScriptConfig.new()
@@ -9,7 +8,7 @@ config:SetParameter("HotKey", "32", config.TYPE_HOTKEY)
 config:SetParameter("Ult", true)
 config:Load()
 
-local play = false local target = nil local effect = {} local castQueue = {} local sleep = {0,0,0}
+local play = false local target = nil local castQueue = {} local sleep = {0,0,0}
 
 function Main(tick)
     if not PlayingGame() then return end
