@@ -7,11 +7,11 @@ require("libs.Animations")
 require("libs.Skillshot")
 
 local config = ScriptConfig.new()
-config:SetParameter("Hotkey", "E", config.TYPE_HOTKEY)
+config:SetParameter("Hotkey", "32", config.TYPE_HOTKEY)
 config:SetParameter("lasthit", "D", config.TYPE_HOTKEY)
 config:Load()
 
-local play = false local myhero = nil local victim = nil local start = false local resettime = nil local dmg = {60,100,140,180} local sleep = {0,0}
+local play = false local myhero = nil local victim = nil local start = false local resettime = nil local sleep = {0,0,0} 
 local rate = client.screenSize.x/1600 local rec = {} local castQueue = {}
 rec[1] = drawMgr:CreateRect(70*rate,26*rate,270*rate,60*rate,0xFFFFFF30,drawMgr:GetTextureId("NyanUI/other/CM_status_1")) rec[1].visible = false
 rec[2] = drawMgr:CreateText(175*rate,52*rate,0xFFFFFF90,"Target :",drawMgr:CreateFont("manabarsFont","Arial",18*rate,700)) rec[2].visible = false
@@ -22,17 +22,6 @@ function Main(tick)
 	local me = entityList:GetMyHero()
 	local ID = me.classId if ID ~= myhero then return end
 
-	if IsKeyDown(config.lasthit) and not client.chat then
-		local Q = me:GetAbility(1)
-		local creeps = entityList:FindEntities({classId=CDOTA_BaseNPC_Creep_Lane,team=TEAM_ENEMY,alive=true,visible=true,team = me:GetEnemyTeam()})
-		for i,v in ipairs(creeps) do
-			if SleepCheck("lasthit") and Q and Q:CanBeCasted() and (v.health > 0 and v.health < dmg[Q.level]) and GetDistance2D(v,me) <= Q.castRange then
-				me:CastAbility(Q,v)
-				Sleep(150+client.latency, "lasthit")
-			end
-		end
-	end
-
 	local attackRange = me.attackRange	
 
 	if victim and victim.visible then
@@ -41,6 +30,30 @@ function Main(tick)
 		end
 	else
 		rec[3].textureId = drawMgr:GetTextureId("NyanUI/spellicons/doom_bringer_empty1")
+	end
+	
+	for i=1,#castQueue,1 do
+		local v = castQueue[1]
+		table.remove(castQueue,1)
+		local ability = v[2]
+		if type(ability) == "string" then
+			ability = me:FindItem(ability)
+		end
+		if ability and me:SafeCastAbility(ability,v[3],false) then
+			sleep[3] = tick + v[1]
+			return
+		end
+	end
+
+	if IsKeyDown(config.lasthit) and not client.chat then
+		local Q = me:GetAbility(1)
+		local creeps = entityList:FindEntities({classId=CDOTA_BaseNPC_Creep_Lane,team=TEAM_ENEMY,alive=true,visible=true,team = me:GetEnemyTeam()})
+		for i,v in ipairs(creeps) do
+			dmg = {60,100,140,180}
+			if Q and Q:CanBeCasted() and v.health < v:DamageTaken(dmg[Q.level],DAMAGE_PURE,me) and GetDistance2D(v,me) <= Q.castRange then
+				table.insert(castQueue,{math.ceil(Q:FindCastPoint()*1000),Q,v})
+			end
+		end
 	end
 
 	if IsKeyDown(config.Hotkey) and not client.chat then	
@@ -56,21 +69,6 @@ function Main(tick)
 				if closest and (not victim or closest.handle ~= victim.handle) then 
 					victim = closest
 				end
-			end
-		end
-		for i=1,#castQueue,1 do
-			local v = castQueue[1]
-			table.remove(castQueue,1)
-			local ability = v[2]
-			if type(ability) == "string" then
-				ability = me:FindItem(ability)
-			end
-			if ability and ((me:SafeCastAbility(ability,v[3],false)) or (v[4] and ability:CanBeCasted())) then
-				if v[4] and ability:CanBeCasted() then
-					me:CastAbility(ability,v[3],false)
-				end
-				sleep[1] = tick + v[1] + client.latency
-				return
 			end
 		end
 		if not Animations.CanMove(me) and victim and victim.alive and GetDistance2D(me,victim) <= 2000 then
@@ -91,7 +89,7 @@ function Main(tick)
 					if W and W:CanBeCasted() and me:CanCast() then
 						table.insert(castQueue,{math.ceil(W:FindCastPoint()*1000),W,victim})
 					end
-					if medallion and medallion:CanBeCasted() and distance <= me.attackRange then
+					if medallion and medallion:CanBeCasted() and distance <= attackRange+100 then
 						table.insert(castQueue,{math.ceil(medallion:FindCastPoint()*1000),medallion,victim})
 					end
 					if abyssal and abyssal:CanBeCasted() and distance <= abyssal.castRange and not disable then
@@ -100,10 +98,10 @@ function Main(tick)
 					if butterfly and butterfly:CanBeCasted() and me:CanCast() then
 						table.insert(castQueue,{100,butterfly})
 					end
-					if mom and mom:CanBeCasted() and distance <= me.attackRange then
+					if mom and mom:CanBeCasted() and distance <= attackRange+100 then
 						table.insert(castQueue,{100,mom})
 					end
-					if satanic and satanic:CanBeCasted() and me.health/me.maxHealth <= 0.4 and distance <= me.attackRange then
+					if satanic and satanic:CanBeCasted() and me.health/me.maxHealth <= 0.4 and distance <= attackRange+100 then
 						table.insert(castQueue,{100,satanic})
 					end
 					if BlackKingBar and BlackKingBar:CanBeCasted() and me:CanCast() then
@@ -134,7 +132,7 @@ function Main(tick)
 			start = false
 		end
 	elseif victim then
-			if not resettime then
+		if not resettime then
 			resettime = client.gameTime
 		elseif (client.gameTime - resettime) >= 6 then
 			victim = nil		
