@@ -126,12 +126,12 @@ function Key(msg,code)
 				client:ExecuteCmd("say_team 1 MISSing from the TOP lane!")
 				
 			elseif IsMouseOn(rec[16]) then	
-			    client:ExecuteCmd("say Поганый РАК ")
+			    client:ExecuteCmd("say WARNING Here is a cat on a tree! Come on, I will show you!")
 			elseif IsMouseOn(rec[17]) then
 				client:ExecuteCmd("dota_player_units_auto_attack 0")
 				client:ExecuteCmd("say_team My AutoAttack Disabled")
 			elseif IsMouseOn(rec[18]) then
-				client:ExecuteCmd("say Отлично Сыграно! ")
+				client:ExecuteCmd("say Well played, kid  Well played!")
 			elseif IsMouseOn(rec[19]) then
 				client:ExecuteCmd("chatwheel_say 45")
 				client:ExecuteCmd("chatwheel_say 41")
