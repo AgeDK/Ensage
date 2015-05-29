@@ -1,23 +1,21 @@
+require('libs.DrawManager3D')
+
 local play = false
 local illusionTable = {}
 
 function Tick(tick)
-    if not PlayingGame() then return end
-    local me = entityList:GetMyHero()
-	local illusions = entityList:FindEntities({type=LuaEntity.TYPE_HERO,illusion=true,team = (5-me.team)})	--
-	for _, heroEntity in ipairs(illusions) do
+    if not SleepCheck() or not PlayingGame() then return end Sleep(200)
+	for _, heroEntity in ipairs(entityList:FindEntities({type = LuaEntity.TYPE_HERO, illusion = true, team = entityList:GetMyHero():GetEnemyTeam()})) do
 		if not (heroEntity.type == 9 and heroEntity.meepoIllusion == false) then
 			if heroEntity.visible and heroEntity.alive and heroEntity:GetProperty("CDOTA_BaseNPC","m_nUnitState") ~= -1031241196  then	
 				if not illusionTable[heroEntity.handle] then
-					illusionTable[heroEntity.handle] = {}
-					illusionTable[heroEntity.handle].effect1 = Effect(heroEntity,"shadow_amulet_active_ground_proj")			
-					illusionTable[heroEntity.handle].effect2 = Effect(heroEntity,"smoke_of_deceit_buff")
-					illusionTable[heroEntity.handle].effect3 = Effect(heroEntity,"smoke_of_deceit_buff")			
-					illusionTable[heroEntity.handle].effect4 = Effect(heroEntity,"smoke_of_deceit_buff")
+					illusionTable[heroEntity.handle] = drawMgr3D:CreateText(heroEntity, Vector(0,0,heroEntity.healthbarOffset),Vector2D(0,-9),0xFFFF00FF,"Illusion",drawMgr:CreateFont("defaultFont","Arial",16,1800))
 				end
-			elseif illusionTable[heroEntity.handle] then
-				illusionTable[heroEntity.handle] = nil
-				collectgarbage("collect")
+			else
+				if illusionTable[heroEntity.handle] then
+					illusionTable[heroEntity.handle]:Destroy()
+					illusionTable[heroEntity.handle] = nil
+				end
 			end
 		end
 	end	
