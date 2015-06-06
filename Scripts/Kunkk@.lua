@@ -58,9 +58,9 @@ function Main(tick)
 		end
 	end
 
-	local target = targetFind:GetClosestToMouse(100)
+	local target = Findtarget(100)
 
-	if target and target.visible then
+	if target and target.alive and target.visible then
 		if not rec[i] then
 			rec[3].textureId = drawMgr:GetTextureId("NyanUI/miniheroes/"..target.name:gsub("npc_dota_hero_",""))
 		end
@@ -68,17 +68,17 @@ function Main(tick)
 		rec[3].textureId = drawMgr:GetTextureId("NyanUI/spellicons/doom_bringer_empty1")
 	end
 	
-	if target and target.alive and GetDistance2D(me,target) <= 2000 then
+	if not IsKeyDown(config.HomeKey) and target and target.alive and GetDistance2D(me,target) <= 2000 then
 		if  xmarks.name == "kunkka_x_marks_the_spot" and torrent and torrent:CanBeCasted() and xmarks.level > 0 and xmarks.abilityPhase then
 			table.insert(castQueue,{1000+math.ceil(torrent:FindCastPoint()*1000),torrent,target.position})
 		end
-		if xmarks.name == "kunkka_return" and me:CanCast() and math.ceil(torrent.cd) ~= math.ceil(torrent:GetCooldown(torrent.cd*10)) then
-			table.insert(castQueue,{1000+math.ceil(xmarks:FindCastPoint()*1000),xmarks})
+		if xmarks.name == "kunkka_return" and me:CanCast() and math.ceil(torrent.cd) ~= math.ceil(torrent:GetCooldown(torrent.cd)) then
+			table.insert(castQueue,{100,xmarks})
 		end
 	end
 
 	if IsKeyDown(config.HotKey) and not client.chat then
-		if target and target.alive and GetDistance2D(me,target) <= 2000 then
+		if target and target.alive and GetDistance2D(me,target) <= 2000 and target.visible then
 			if xmarks.name == "kunkka_x_marks_the_spot" and xmarks:CanBeCasted() and me:CanCast() then
 				table.insert(castQueue,{1000+math.ceil(xmarks:FindCastPoint()*1000),xmarks,target})
 				lastpos = target.position
@@ -89,11 +89,31 @@ function Main(tick)
 			if torrent and torrent:CanBeCasted() and me:CanCast() and ghostship.level > 0 and ghostship.abilityPhase then
 				table.insert(castQueue,{1000+math.ceil(torrent:FindCastPoint()*1000),torrent,lastpos})
 			end
-			if xmarks.name == "kunkka_return" and me:CanCast() and math.ceil(torrent.cd) ~= math.ceil(torrent:GetCooldown(torrent.cd*10)) then
-				table.insert(castQueue,{1000+math.ceil(xmarks:FindCastPoint()*1000),xmarks})
+			if xmarks.name == "kunkka_return" and me:CanCast() and math.ceil(torrent.cd) ~= math.ceil(torrent:GetCooldown(torrent.cd)) then
+				table.insert(castQueue,{100,xmarks})
 			end
 		end
 	end
+end
+
+function Findtarget(source,range,includeFriendly)
+	local me = entityList:GetMyHero()
+	if not includeFriendly and type(range) == "boolean" then
+		includeFriendly = range
+	end
+	if not range or type(range) == "boolean" then 
+		range = source
+		source = nil
+	end
+	local enemies 
+	if includeFriendly then
+		enemies = entityList:FindEntities(function (v) return v.hero and v.alive and v.health > 0 and not v:IsIllusion() and (not source or v:GetDistance2D(source) < range) and v:GetDistance2D(me) < 2000 end)
+	else
+		local enemyTeam = me:GetEnemyTeam()
+		enemies = entityList:FindEntities(function (v) return v.hero and v.alive and v.health > 0 and not v:IsIllusion() and v.team == enemyTeam and (not source or v:GetDistance2D(source) < range) and v:GetDistance2D(me) < 2000 end)
+	end
+	table.sort( enemies, function (a,b) return a:GetDistance2D(client.mousePosition) < b:GetDistance2D(client.mousePosition) end )
+	return enemies[1]
 end
 
 function Load()
