@@ -1,33 +1,33 @@
---<<Download texture https://mega.co.nz/#!8AZiFAbY!kMdEz0Fezz6cRzpVPrsNJTuUd4RFwHqDSI3cOV51U34 and unpack to nyanui/other>>
-
-require("libs.ScriptConfig")
+require("libs.HotkeyConfig2")
 require("libs.Utils")
 require("libs.TargetFind")
 require("libs.Animations")
 require("libs.Skillshot")
 
-local config = ScriptConfig.new()
-config:SetParameter("Hotkey", "32", config.TYPE_HOTKEY)
-config:Load()
+ScriptConfig = ConfigGUI:New(script.name)
+script:RegisterEvent(EVENT_KEY, ScriptConfig.Key, ScriptConfig)
+script:RegisterEvent(EVENT_TICK, ScriptConfig.Refresh, ScriptConfig)
+ScriptConfig:SetName("Storm Spirit")
+ScriptConfig:SetExtention(-.3)
+ScriptConfig:SetVisible(false)
 
-local play = false local myhero = nil local victim = nil local start = false local resettime = nil local sleep = {0,0,0}
-local rate = client.screenSize.x/1600 local rec = {} local castQueue = {}
-rec[1] = drawMgr:CreateRect(70*rate,26*rate,270*rate,60*rate,0xFFFFFF30,drawMgr:GetTextureId("NyanUI/other/CM_status_1")) rec[1].visible = false
-rec[2] = drawMgr:CreateText(175*rate,52*rate,0xFFFFFF90,"Target :",drawMgr:CreateFont("manabarsFont","Arial",18*rate,700)) rec[2].visible = false
-rec[3] = drawMgr:CreateRect(220*rate,54*rate,16*rate,16*rate,0xFFFFFF30) rec[3].visible = false
+ScriptConfig:AddParam("hotkey","Key",SGC_TYPE_ONKEYDOWN,false,false,32)
+ScriptConfig:AddParam("dodge","Auto Dodge Spells",SGC_TYPE_TOGGLE,false,true,nil)
+
+play, myhero, victim, start, resettime, castQueue, castsleep, move, dodge = false, nil, nil, false, false, {}, 0, 0, 0
+
+dodgeList = {
+	npc_dota_hero_lina = {spell = "lina_laguna_blade"},
+	npc_dota_hero_sven = {spell = "sven_storm_bolt"},
+	npc_dota_hero_vengefulspirit = {spell = "vengefulspirit_magic_missile"},
+	npc_dota_hero_skeleton_king = {spell = "skeleton_king_hellfire_blast"},
+	npc_dota_hero_lion = {spell = "lion_finger_of_death"}
+} 
 
 function Main(tick)
 	if not PlayingGame() then return end
 	local me = entityList:GetMyHero()
 	local ID = me.classId if ID ~= myhero then return end
-
-	if victim and victim.visible then
-		if not rec[i] then
-			rec[3].textureId = drawMgr:GetTextureId("NyanUI/miniheroes/"..victim.name:gsub("npc_dota_hero_",""))
-		end
-	else
-		rec[3].textureId = drawMgr:GetTextureId("NyanUI/spellicons/doom_bringer_empty1")
-	end
 
 	for i=1,#castQueue,1 do
 		local v = castQueue[1]
@@ -40,22 +40,35 @@ function Main(tick)
 			if v[4] and ability:CanBeCasted() then
 				me:CastAbility(ability,v[3],false)
 			end
-			sleep[3] = tick + v[1] + client.latency
+			castsleep = tick + v[1] + client.latency
+			dodge = tick + v[1] + client.latency
 			return
 		end
 	end
 
-	local attackRange = me.attackRange	
+	if ScriptConfig.dodge and tick > dodge then
+		local enemies = entityList:GetEntities({type=LuaEntity.TYPE_HERO,team=me:GetEnemyTeam(),illusion=false})
+		for i,v in ipairs(enemies) do
+			local R = me:GetAbility(4)
+			if R and R:CanBeCasted() and me:CanCast() and dodgeList[v.name] then
+				local spell = v:FindSpell(dodgeList[v.name].spell)
+				if spell and spell.abilityPhase and (math.max(math.abs(FindAngleR(v) - math.rad(FindAngleBetween(v, me))) - 0.20, 0)) == 0 then
+					table.insert(castQueue,{math.ceil(R:FindCastPoint()*1000),R,me.position})
+				end
+			end
+		end
+		dodge = tick + 200
+	end
 
-	if IsKeyDown(config.Hotkey) and not client.chat then	
-		if Animations.CanMove(me) or not start or (victim and GetDistance2D(victim,me) > attackRange+50) then
+	if ScriptConfig.hotkey then	
+		if Animations.CanMove(me) or not start or (victim and GetDistance2D(victim,me) > me.attackRange+50) then
 			start = true
 			local lowestHP = targetFind:GetLowestEHP(3000, phys)
 			if lowestHP and (not victim or victim.creep or GetDistance2D(me,victim) > 600 or not victim.alive or lowestHP.health < victim.health) and SleepCheck("victim") then			
 				victim = lowestHP
 				Sleep(250,"victim")
 			end
-			if victim and GetDistance2D(victim,me) > attackRange+200 and victim.visible then
+			if victim and GetDistance2D(victim,me) > me.attackRange+200 and victim.visible then
 				local closest = targetFind:GetClosestToMouse(me,2000)
 				if closest and (not victim or closest.handle ~= victim.handle) then 
 					victim = closest
@@ -63,24 +76,14 @@ function Main(tick)
 			end
 		end
 		if not Animations.CanMove(me) and victim and GetDistance2D(me,victim) <= 2000 then
-			if tick > sleep[1] then
+			if tick > castsleep then
 				if not Animations.isAttacking(me) then
-					local Q = me:GetAbility(1)
-					local R = me:GetAbility(4) 
-					local W = me:GetAbility(2)
-					local Overload = me:DoesHaveModifier("modifier_storm_spirit_overload")
-					local Sheep = me:FindItem("item_sheepstick")
-					local Orchid = me:FindItem("item_orchid")
-					local Shivas = me:FindItem("item_shivas_guard")
-					local Sphere = me:FindItem("item_sphere")
-					local distance = GetDistance2D(victim,me)
-					local disable = victim:IsSilenced() or victim:IsHexed() or victim:IsStunned() or victim:IsLinkensProtected()
-					local balling = me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
-					if R and R:CanBeCasted() and me:CanCast() and distance > attackRange+50 and not balling and not R.abilityPhase then
-						local CP = R:FindCastPoint()
-						local delay = ((270-Animations.getDuration(W)*1000)+CP*1000+client.latency+me:GetTurnTime(victim)*1000)
-						local speed = R:GetSpecialData("ball_lightning_move_speed", R.level)
-						local xyz = SkillShot.SkillShotXYZ(me,victim,delay,speed)
+					local Q, W, R = me:GetAbility(1), me:GetAbility(2), me:GetAbility(4)
+					local Overload, balling = me:DoesHaveModifier("modifier_storm_spirit_overload"), me:DoesHaveModifier("modifier_storm_spirit_ball_lightning")
+					local Sheep, Orchid, Shivas, Sphere = me:FindItem("item_sheepstick"), me:FindItem("item_orchid"), me:FindItem("item_shivas_guard"), me:FindItem("item_sphere")
+					local distance, disabled = GetDistance2D(victim,me),victim:IsSilenced() or victim:IsHexed() or victim:IsStunned()
+					if R and R:CanBeCasted() and me:CanCast() and distance > me.attackRange+200 and not balling and not R.abilityPhase then
+						local xyz = SkillShot.SkillShotXYZ(me,victim,((270-Animations.getDuration(W)*1000)+R:FindCastPoint()*1000+client.latency+me:GetTurnTime(victim)*1000),R:GetSpecialData("ball_lightning_move_speed", R.level))
 						if xyz then 
 							table.insert(castQueue,{math.ceil(R:FindCastPoint()*1000),R,xyz})
 						end
@@ -91,10 +94,10 @@ function Main(tick)
 					if W and W:CanBeCasted() and not disable and distance <= W.castRange then
 						table.insert(castQueue,{math.ceil(W:FindCastPoint()*1000),W,victim,true})
 					end
-					if Orchid and Orchid:CanBeCasted() and not disable then
+					if Orchid and Orchid:CanBeCasted() and not disable and (Sheep and Sheep.cd ~= 0 and not victim:IsHexed() or not Sheep) then
 						table.insert(castQueue,{math.ceil(Orchid:FindCastPoint()*1000),Orchid,victim})
 					end
-					if Sheep and Sheep:CanBeCasted() and not disable and Orchid.cd ~= 0 then
+					if Sheep and Sheep:CanBeCasted() and not disable then
 						table.insert(castQueue,{math.ceil(Sheep:FindCastPoint()*1000),Sheep,victim})
 					end
 					if Sphere and Sphere:CanBeCasted() then
@@ -105,9 +108,9 @@ function Main(tick)
 					end
 				end
 				me:Attack(victim)
-				sleep[1] = tick + 100
+				castsleep = tick + 200
 			end
-		elseif tick > sleep[2] then
+		elseif tick > move then
 			if victim then
 				if victim.visible then
 					local xyz = SkillShot.PredictedXYZ(victim,me:GetTurnTime(victim)*1000+client.latency+500)
@@ -116,13 +119,13 @@ function Main(tick)
 					me:Follow(victim)
 				end
 			end
-			sleep[2] = tick + 100
+			move = tick + 200
 			start = false
 		end
 	elseif victim then
 		if not resettime then
 			resettime = client.gameTime
-		elseif (client.gameTime - resettime) >= 2 then
+		elseif (client.gameTime - resettime) >= 6 then
 			victim = nil		
 		end
 		start = false
@@ -135,14 +138,8 @@ function Load()
 		if me.classId ~= CDOTA_Unit_Hero_StormSpirit then 
 			script:Disable() 
 		else
-			play = true
-			victim = nil
-			start = false
-			resettime = nil
-			myhero = me.classId
-			rec[1].w = 90*rate + 30*0*rate + 65*rate rec[1].visible = true
-			rec[2].x = 30*rate + 90*rate + 30*0*rate + 65*rate - 95*rate rec[2].visible = true
-			rec[3].x = 80*rate + 90*rate + 30*0*rate + 65*rate - 50*rate rec[3].visible = true
+			ScriptConfig:SetVisible(true)
+			play, victim, start, resettime, myhero = true, nil, false, nil, me.classId
 			script:RegisterEvent(EVENT_FRAME, Main)
 			script:UnregisterEvent(Load)
 		end
@@ -150,13 +147,9 @@ function Load()
 end
 
 function Close()
-	myhero = nil
-	victim = nil
-	start = false
-	resettime = nil
-	rec[1].visible = false
-	rec[2].visible = false
-	rec[3].visible = false
+	myhero, victim, start, resettime = nil, nil, false, nil
+	ScriptConfig:SetVisible(false)
+	collectgarbage("collect")
 	if play then
 		script:UnregisterEvent(Main)
 		script:RegisterEvent(EVENT_TICK,Load)
