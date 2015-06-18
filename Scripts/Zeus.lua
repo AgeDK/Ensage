@@ -1,14 +1,19 @@
 require("libs.Utils")
 require("libs.TargetFind")
-require("libs.ScriptConfig")
+require("libs.HotkeyConfig2")
 require("libs.Skillshot")
 
-local config = ScriptConfig.new()
-config:SetParameter("HotKey", "32", config.TYPE_HOTKEY)
-config:SetParameter("Ult", true)
-config:Load()
+ScriptConfig = ConfigGUI:New(script.name)
+script:RegisterEvent(EVENT_KEY, ScriptConfig.Key, ScriptConfig)
+script:RegisterEvent(EVENT_TICK, ScriptConfig.Refresh, ScriptConfig)
+ScriptConfig:SetName("Zeus")
+ScriptConfig:SetExtention(-.3)
+ScriptConfig:SetVisible(false)
 
-local play, target, castQueue, castsleep, sleep = false, nil, {}, 0, 0
+ScriptConfig:AddParam("hotkey","Key",SGC_TYPE_ONKEYDOWN,false,false,32)
+ScriptConfig:AddParam("ult","Auto ult",SGC_TYPE_TOGGLE,false,true,nil)
+
+play, target, castQueue, castsleep = false, nil, {}, 0
 
 function Main(tick)
     if not PlayingGame() then return end
@@ -31,9 +36,9 @@ function Main(tick)
 		end
 	end
 
-	if IsKeyDown(config.HotKey) and not client.chat then
+	if ScriptConfig.hotkey then
 		target = targetFind:GetClosestToMouse(100)
-		if tick > sleep then
+		if tick > castsleep then
 			if target and GetDistance2D(target,me) <= 2000 and not target:DoesHaveModifier("modifier_item_blade_mail_reflect") and not target:DoesHaveModifier("modifier_item_lotus_orb_active") and not target:IsMagicImmune() and target:CanDie() then
 				local Q, W, R = me:GetAbility(1), me:GetAbility(2), me:GetAbility(4)
 				local distance = GetDistance2D(target,me)
@@ -64,7 +69,7 @@ function Main(tick)
 				if me.mana < me.maxMana*0.5 and soulring and soulring:CanBeCasted() then
 					table.insert(castQueue,{100,soulring})
 				end
-				if config.Ult and target and R and R:CanBeCasted() then
+				if ScriptConfig.ult and target and R and R:CanBeCasted() then
 					Dmg = R:GetSpecialData("damage",R.level)
 					if me:AghanimState() then		
 						Dmg = R:GetSpecialData("damage_scepter",R.level)
@@ -78,7 +83,7 @@ function Main(tick)
 				elseif slow then
 					me:Follow(target)
 				end
-				sleep = tick + 100
+				castsleep = tick 
 			end
 		end
 	end
@@ -90,6 +95,7 @@ function Load()
 		if not me or me.classId ~= CDOTA_Unit_Hero_Zuus then 
 			script:Disable()
 		else
+			ScriptConfig:SetVisible(true)
 			play, target, myhero = true, nil, me.classId
 			script:RegisterEvent(EVENT_FRAME, Main)
 			script:UnregisterEvent(Load)
@@ -99,6 +105,7 @@ end
 
 function Close()
 	target, myhero = nil, nil
+	ScriptConfig:SetVisible(false)
 	collectgarbage("collect")
 	if play then
 		script:UnregisterEvent(Main)
