@@ -57,7 +57,40 @@ rec[42] = drawMgr:CreateRect(225*rate,100*rate,20*rate,20*rate,0x000000FF,drawMg
 rec[43] = drawMgr:CreateRect(245*rate,100*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/dac15_water"))
 rec[44] = drawMgr:CreateRect(265*rate,100*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/dac15_angry"))
 rec[45] = drawMgr:CreateRect(285*rate,100*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/puppy"))
-rec[46] = drawMgr:CreateRect(5*rate,60*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/other/Passive_Deny"))
+--4
+rec[46] = drawMgr:CreateRect(5*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/throwgame"))
+rec[47] = drawMgr:CreateRect(25*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/thinking"))
+rec[48] = drawMgr:CreateRect(45*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/angel"))
+rec[49] = drawMgr:CreateRect(65*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/stunned"))
+rec[50] = drawMgr:CreateRect(85*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/disappear"))
+rec[51] = drawMgr:CreateRect(105*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/eyeroll"))
+rec[52] = drawMgr:CreateRect(125*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/gross"))
+rec[53] = drawMgr:CreateRect(145*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/aegis2015"))
+rec[54] = drawMgr:CreateRect(165*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/tp"))
+rec[55] = drawMgr:CreateRect(185*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/salty"))
+rec[56] = drawMgr:CreateRect(205*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/ggdire"))
+rec[57] = drawMgr:CreateRect(225*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/ggradiant"))
+rec[58] = drawMgr:CreateRect(245*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/aaaah"))
+rec[59] = drawMgr:CreateRect(265*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/bts_bristle"))
+rec[60] = drawMgr:CreateRect(285*rate,120*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/bts_godz"))
+--5
+rec[61] = drawMgr:CreateRect(5*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/bts_lina"))
+rec[62] = drawMgr:CreateRect(25*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/dac15_blush"))
+rec[63] = drawMgr:CreateRect(45*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/dac15_cool"))
+rec[64] = drawMgr:CreateRect(65*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/dac15_frog"))
+rec[65] = drawMgr:CreateRect(85*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/dac15_nosewipe"))
+rec[66] = drawMgr:CreateRect(105*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/dac15_stab"))
+rec[67] = drawMgr:CreateRect(125*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/dac15_surprice"))
+rec[68] = drawMgr:CreateRect(145*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/fail"))
+rec[69] = drawMgr:CreateRect(165*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/techies2"))
+rec[70] = drawMgr:CreateRect(185*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/ti4bronze"))
+rec[71] = drawMgr:CreateRect(205*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/ti4copper"))
+rec[72] = drawMgr:CreateRect(225*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/ti4diamond"))
+rec[73] = drawMgr:CreateRect(245*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/ti4gold"))
+rec[74] = drawMgr:CreateRect(265*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/ti4platinum"))
+rec[75] = drawMgr:CreateRect(285*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/emoticons/ti4silver"))
+
+rec[76] = drawMgr:CreateRect(305*rate,140*rate,20*rate,20*rate,0x000000FF,drawMgr:GetTextureId("NyanUI/other/Passive_Deny"))
 
 rec[#rec+1] = drawMgr:CreateRect(5*rate,60*rate,300*rate,60*rate,0x0000070)
 
@@ -72,10 +105,10 @@ function Tick(tick)
                          end
              	         if IsKeysDown(ShiftEnter) then
 						  sayTo = "say "
-						  rec[46].textureId = drawMgr:GetTextureId("NyanUI/other/Active_Deny")
-						 elseif IsKeyDown(13) and not IsKeyDown(16) and not rec[46].visible == true then
+						  rec[76].textureId = drawMgr:GetTextureId("NyanUI/other/Active_Deny")
+						 elseif IsKeyDown(13) and not IsKeyDown(16) and not rec[76].visible == true then
 						  sayTo = "say_team "
-						  rec[46].textureId = drawMgr:GetTextureId("NyanUI/other/Passive_Deny")
+						  rec[76].textureId = drawMgr:GetTextureId("NyanUI/other/Passive_Deny")
 						 end
 end
 
@@ -181,21 +214,84 @@ function Key(msg,code)
                            elseif IsMouseOn(rec[42]) then
                             client:ExecuteCmd(sayTo.."") --bts_rosh
                            elseif IsMouseOn(rec[43]) then
-                            client:ExecuteCmd(sayTo.."") --dac15_water
+                            client:ExecuteCmd(sayTo.."") --dac15_transform
                            elseif IsMouseOn(rec[44]) then
                             client:ExecuteCmd(sayTo.."") --dac15_angry
                            elseif IsMouseOn(rec[45]) then
                             client:ExecuteCmd(sayTo.."") --puppy
+							
                            elseif IsMouseOn(rec[46]) then
+                            client:ExecuteCmd(sayTo.."") --throwgame
+						   elseif IsMouseOn(rec[47]) then
+                            client:ExecuteCmd(sayTo.."") --thinking
+                           elseif IsMouseOn(rec[48]) then
+                            client:ExecuteCmd(sayTo.."") --angel
+                           elseif IsMouseOn(rec[49]) then
+                            client:ExecuteCmd(sayTo.."") --stunned
+                           elseif IsMouseOn(rec[50]) then
+                            client:ExecuteCmd(sayTo.."") --disappear
+                           elseif IsMouseOn(rec[51]) then
+                            client:ExecuteCmd(sayTo.."") --eyeroll
+                           elseif IsMouseOn(rec[52]) then
+                            client:ExecuteCmd(sayTo.."") --gross
+                           elseif IsMouseOn(rec[53]) then
+                            client:ExecuteCmd(sayTo.."") --aegis2015
+                           elseif IsMouseOn(rec[54]) then						   
+                            client:ExecuteCmd(sayTo.."") --tp
+                           elseif IsMouseOn(rec[55]) then
+                            client:ExecuteCmd(sayTo.."") --salty
+                           elseif IsMouseOn(rec[56]) then
+                            client:ExecuteCmd(sayTo.."") --ggdire
+                           elseif IsMouseOn(rec[57]) then
+                            client:ExecuteCmd(sayTo.."") --ggradiant
+                           elseif IsMouseOn(rec[58]) then
+                            client:ExecuteCmd(sayTo.."") --aaaah
+                           elseif IsMouseOn(rec[59]) then
+                            client:ExecuteCmd(sayTo.."") --bts_bristle
+                           elseif IsMouseOn(rec[60]) then
+                            client:ExecuteCmd(sayTo.."") --bts_godz
+							
+                           elseif IsMouseOn(rec[61]) then
+                            client:ExecuteCmd(sayTo.."") --bts_lina
+						   elseif IsMouseOn(rec[62]) then
+                            client:ExecuteCmd(sayTo.."") --dac15_blush
+                           elseif IsMouseOn(rec[63]) then
+                            client:ExecuteCmd(sayTo.."") --dac15_cool
+                           elseif IsMouseOn(rec[64]) then
+                            client:ExecuteCmd(sayTo.."") --dac15_frog
+                           elseif IsMouseOn(rec[65]) then
+                            client:ExecuteCmd(sayTo.."") --dac15_nosewipe
+                           elseif IsMouseOn(rec[66]) then
+                            client:ExecuteCmd(sayTo.."") --dac15_stab
+                           elseif IsMouseOn(rec[67]) then
+                            client:ExecuteCmd(sayTo.."") --dac15_surprice
+                           elseif IsMouseOn(rec[68]) then					   
+                            client:ExecuteCmd(sayTo.."") --fail
+                           elseif IsMouseOn(rec[69]) then
+                            client:ExecuteCmd(sayTo.."") --techies
+                           elseif IsMouseOn(rec[70]) then
+                            client:ExecuteCmd(sayTo.."") --ti4bronze
+                           elseif IsMouseOn(rec[71]) then
+                            client:ExecuteCmd(sayTo.."") --ti4copper
+                           elseif IsMouseOn(rec[72]) then
+                            client:ExecuteCmd(sayTo.."") --ti4diamond
+                           elseif IsMouseOn(rec[73]) then
+                            client:ExecuteCmd(sayTo.."") --ti4gold
+                           elseif IsMouseOn(rec[74]) then
+                            client:ExecuteCmd(sayTo.."") --ti4platinum
+                           elseif IsMouseOn(rec[75]) then
+                            client:ExecuteCmd(sayTo.."") --ti4silver
+						
+                           elseif IsMouseOn(rec[76]) then
                            end
                           end
-						  if IsMouseOn(rec[46]) then
+						  if IsMouseOn(rec[76]) then
                            if sayTo == "say_team " then
 						   sayTo = "say "
-						   rec[46].textureId = drawMgr:GetTextureId("NyanUI/other/Active_Deny")
+						   rec[76].textureId = drawMgr:GetTextureId("NyanUI/other/Active_Deny")
 						   elseif sayTo == "say " then
 						   sayTo = "say_team "
-						   rec[46].textureId = drawMgr:GetTextureId("NyanUI/other/Passive_Deny")
+						   rec[76].textureId = drawMgr:GetTextureId("NyanUI/other/Passive_Deny")
 						   end
                           end
 						  end
@@ -270,9 +366,15 @@ function Clear()
                           elseif i < 31 then
                            rec[i].x = 25*rate+20*(i-16)*rate + xx
                            rec[i].y = 80*rate + yy                         
-                          else
+						  elseif i < 46 then
                            rec[i].x = 25*rate+20*(i-31)*rate + xx
-                           rec[i].y = 100*rate + yy
+                           rec[i].y = 100*rate + yy  
+                          elseif i < 61 then
+                           rec[i].x = 25*rate+20*(i-46)*rate + xx
+                           rec[i].y = 120*rate + yy
+                          else
+                           rec[i].x = 25*rate+20*(i-61)*rate + xx
+                           rec[i].y = 140*rate + yy
                           end
                          end
 end
@@ -289,10 +391,16 @@ function Load()
                             rec[i].y = 60*rate + yy                            
                            elseif i < 31 then
                             rec[i].x = 25*rate+20*(i-16)*rate + xx
-                            rec[i].y = 80*rate + yy                         
-                           else
+                            rec[i].y = 80*rate + yy               
+                           elseif i < 46 then
                             rec[i].x = 25*rate+20*(i-31)*rate + xx
-                            rec[i].y = 100*rate + yy
+                            rec[i].y = 100*rate + yy    							
+						   elseif i < 61 then
+							rec[i].x = 25*rate+20*(i-46)*rate + xx
+							rec[i].y = 120*rate + yy
+                           else
+							rec[i].x = 25*rate+20*(i-61)*rate + xx
+							rec[i].y = 140*rate + yy
                            end
                            rec[i].visible = false
                           end                           
