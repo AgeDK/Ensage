@@ -195,38 +195,32 @@ ResTable =
 	},
 }
 
-slowDown = 0
+playinggame, slowDown = {}, 0
 
 function Tick()
 	local playing = PlayingGame()
+	if not playinggame.init and playing then
+		script:RegisterEvent(EVENT_DOTA,RoshEvent)
+		script:RegisterEvent(EVENT_FRAME,CourierTick)
+		script:RegisterEvent(EVENT_FRAME,EffectFrame)
+		playinggame.init = true
+	end
 	ScriptConfig:SetVisible(playing)
 	slowDown = 1 + slowDown%ScriptConfig.slowDown
 	if slowDown == 1 then
 		TickCounter.Start()
 		CreepMasterTick(playing)
-
 		EffectTick(playing)
-
 		RuneTick(playing)
-
 		RoshanTick(playing)
-
 		MissingTick(playing)
-
 		HpTick(playing)
-
 		ManaBarTick(playing)
-
 		CollectData(playing)
-
 		AdvancedTick(playing)
-
 		ScoreBoardTick(playing)
-
 		GlyphTick(playing)
-
 		ItemTick(playing)
-
 		RoshanRespawnTick(playing)
 		TickCounter.CalculateAvg()
 		if IsKeyDown(45) then
@@ -362,6 +356,7 @@ end
 
 --== ENEMY GLYPH MONITOR ==--
 
+enemyGlyph = {}
 glyphFont = drawMgr:CreateFont("glyphFont","Arial",14,1600)
 
 function GlyphTick(playing)
@@ -369,15 +364,16 @@ function GlyphTick(playing)
 		local pos = Vector2D(screenSize.x - screenSize.y*0.02222,screenSize.y*0.9759)
 		local glyphText = GetGlyphTime()
 		local glyphSize = glyphFont:GetTextSize(glyphText)
-		if not enemyGlyph then
+		if not enemyGlyph.init then
+			enemyGlyph.init = true
 			enemyGlyph = drawMgr:CreateText(pos.x - glyphSize.x/2,pos.y - glyphSize.y/2,0xFFFFFF80,glyphText,glyphFont)
 		else
 			enemyGlyph.x = pos.x - glyphSize.x/2
 			enemyGlyph.text = glyphText
 		end		
-	elseif enemyGlyph then
+	elseif enemyGlyph.init then
 		enemyGlyph.visible = false
-        enemyGlyph = nil
+        enemyGlyph = {}
 	end
 end
 
@@ -428,7 +424,6 @@ function IsHeroDead(hero)
 end
 
 function UpdateSB(playerId)
-
 	if SleepCheck("scoreboard"..playerId) then
 		scoreboard[playerId].pos = GetScoreBoardPos(playerId)
 		Sleep(ScriptConfig.slowDown*1000,"scoreboard"..playerId)
@@ -1027,10 +1022,8 @@ function UpdateAdv(hero)
 				advancedM[hero.handle]["bear"..i.."CD"].visible = false
 				advancedM[hero.handle]["bear"..i.."CD"] = nil
 			end
-
 		end
 	end
-
 	UpdateSpells(hero)
 end 
 
@@ -1170,9 +1163,7 @@ function CreateAdv(hero)
 			advancedM[hero.handle]["bear"..i.."CD"] = drawMgr:CreateText(itemTopLeft.x + itemSize/2 - itemcdSize.x/2,itemTopLeft.y + itemSize/2 + 2 - itemcdSize.y/2,0xFFFFFFFF,itemcdText,itemCdFont)
 		end
 	end
-
 	StructureSpells(hero)
-
 	advancedM.count = advancedM.count + 1
 end
 
@@ -1838,11 +1829,7 @@ function RoshanTick(playing)
 		    end
 		end
 	elseif roshObjs.init then
-        for k,v in pairs(roshObjs) do
-            if k ~= "init" then
-                v.visible = false
-            end
-        end
+		roshObjs.visible = false
         roshObjs = {}
 	end
 end
@@ -1851,12 +1838,12 @@ function RoshAlive()
     local entities = entityList:GetEntities({classId=CDOTA_Unit_Roshan})
     tickDelta = client.gameTime-roshObjs.deathTick
     if #entities > 0 and tickDelta > 60 then
-            local rosh = entities[1]
-            if rosh and rosh.alive then
-                    return true
-            end
-    end
-    return false
+		local rosh = entities[1]
+		if rosh and rosh.alive then
+			return true
+		end
+	end
+	return false
 end
 
 
@@ -1869,8 +1856,6 @@ function RoshEvent( event )
         end
     end
 end
-
-script:RegisterEvent(EVENT_DOTA,RoshEvent)
 
 --== RUNE MONITOR ==--
 
@@ -1998,8 +1983,6 @@ function CourierTick()
     end
 end
 
-script:RegisterEvent(EVENT_FRAME,CourierTick)
-
 --== EFFECT PLACEMENT ==--
 
 function AlliedInfest(unit)
@@ -2017,8 +2000,6 @@ function EffectFrame( ... )
 		end
 	end
 end
-
-script:RegisterEvent(EVENT_FRAME,EffectFrame)
 
 function EffectTick(playing)
 	if playing then
@@ -2279,4 +2260,106 @@ mb.emptyManaColor = 0x001863FF
 MinimapMapScaleX = location.minimap.w / MapWidth
 MinimapMapScaleY = location.minimap.h / MapHeight
 
+function Close()
+	roshAlive = nil
+	if items.init then
+		items = {}
+	end
+	if enemyGlyph.init then
+		enemyGlyph.visible = false
+        enemyGlyph = nil
+    end
+	if scoreboard.init then
+		for k,v in pairs(scoreboard) do
+            if type(k) == "table" then
+            	for key,value in pairs(v) do
+            		if type(value) == "userdata" and v.visible then
+	            		value.visible = false
+	            	end
+            	end
+            end
+        end
+        scoreboard = {}
+	end
+	if advancedM.init then
+		for k,v in pairs(advancedM) do
+            if type(k) == "table" then
+            	for key,value in pairs(v) do
+            		if type(value) == "userdata" and v.visible then
+	            		value.visible = false
+	            	end
+            	end
+            end
+        end
+        advancedM = {}
+	end
+	if enemyData.init then
+        enemyData = {}
+	end
+	if manaBar.init then
+		for k,v in pairs(manaBar) do
+            if k ~= "init" then
+            	for key,value in pairs(v) do
+	            	value:Destroy()
+            	end
+            end
+        end
+        manaBar = {}
+	end
+	if hpMon.init then
+		for k,v in pairs(hpMon) do
+            if k ~= "init" then
+            	v:Destroy()
+            end
+        end
+        hpMon = {}
+	end
+	if missingObjs.init then
+        for k,v in pairs(missingObjs) do
+            if k ~= "init" and k ~= "heroData" and k ~= "count" then
+            	if GetType(v) == "DrawObject3D" then
+            		v:Destroy()
+            	else
+                	v.visible = false
+                end
+            end
+        end
+        missingObjs = {}
+	end
+	if roshObjs.init then
+		roshObjs.visible = false
+        roshObjs = {}
+	end
+	if runeObjs.init then
+        for k,v in pairs(runeObjs) do
+            if k ~= "init" then
+                v.visible = false
+            end
+        end
+        runeObjs = {}
+	end
+    if cours.init then
+        for k,v in pairs(cours) do
+            if k ~= "init" then
+                v.visible = false
+            end
+        end
+        cours = {}
+    end
+	if effects.init then
+		effects = {}
+	end
+	if creeps and creeps.init then
+		CreepDeInit()
+	end
+	collectgarbage("collect")
+	if playinggame.init then
+		script:UnregisterEvent(RoshEvent)
+		script:UnregisterEvent(CourierTick)
+		script:UnregisterEvent(EffectFrame)
+		playinggame.init = false
+	end
+end
+
+script:RegisterEvent(EVENT_CLOSE,Close)
 script:RegisterEvent(EVENT_TICK,Tick)
