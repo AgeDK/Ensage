@@ -1,5 +1,5 @@
-xPosition,yPosition = 220,5
-xPositionN,yPositionN = 220,20
+xPosition,yPosition = 5,60
+xPositionN,yPositionN = 5,75
 myFont = drawMgr:CreateFont("Roshancheg","Arial",13,400)
 StatusText = drawMgr:CreateText(xPosition,yPosition,0xFFFFFFFF,"",myFont);
 InstructionTextToSpawn = drawMgr:CreateText(xPositionN,yPositionN,0xff0000ff,"Time, to respawn - To complete full respawn",myFont);
@@ -70,7 +70,6 @@ function ubiliroshana(tick)
 		reakciyacheloveka = 1
 	end
 	if tick > sleep then
-		client:ExecuteCmd("chatwheel_say 53")
 		client:ExecuteCmd("chatwheel_say 57")
 		reakciyacheloveka = nil
 		script:UnregisterEvent(ubiliroshana)
